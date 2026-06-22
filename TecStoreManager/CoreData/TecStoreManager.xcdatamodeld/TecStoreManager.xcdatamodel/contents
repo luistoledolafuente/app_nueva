@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22758" systemVersion="23A5257q" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Cliente" representedClassName="Cliente" syncable="YES" codeGenerationType="class">
+        <attribute name="apellidos" optional="YES" attributeType="String"/>
+        <attribute name="correo" optional="YES" attributeType="String"/>
+        <attribute name="direccion" optional="YES" attributeType="String"/>
+        <attribute name="dni" optional="YES" attributeType="String"/>
+        <attribute name="estado" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="idCliente" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="nombres" optional="YES" attributeType="String"/>
+        <attribute name="telefono" optional="YES" attributeType="String"/>
+        <relationship name="ventas" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Venta" inverseName="cliente" inverseEntity="Venta"/>
+    </entity>
+    <entity name="Producto" representedClassName="Producto" syncable="YES" codeGenerationType="class">
+        <attribute name="categoria" optional="YES" attributeType="String"/>
+        <attribute name="codigo" optional="YES" attributeType="String"/>
+        <attribute name="estado" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="fechaRegistro" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="idProducto" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="nombre" optional="YES" attributeType="String"/>
+        <attribute name="precio" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="stock" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="ventas" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Venta" inverseName="producto" inverseEntity="Venta"/>
+    </entity>
+    <entity name="Ubicacion" representedClassName="Ubicacion" syncable="YES" codeGenerationType="class">
+        <attribute name="direccionReferencia" optional="YES" attributeType="String"/>
+        <attribute name="fechaRegistro" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="idUbicacion" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="latitud" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="longitud" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="Usuario" representedClassName="Usuario" syncable="YES" codeGenerationType="class">
+        <attribute name="estado" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="idUsuario" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="nombreCompleto" optional="YES" attributeType="String"/>
+        <attribute name="nombreUsuario" optional="YES" attributeType="String"/>
+        <attribute name="password" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="Venta" representedClassName="Venta" syncable="YES" codeGenerationType="class">
+        <attribute name="cantidad" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="fechaVenta" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="idVenta" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="igv" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="precio" optional="YES" attributeType="Double" usesScalarValueType="YES"/>
+        <attribute name="subtotal" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="total" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="cliente" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Cliente" inverseName="ventas" inverseEntity="Cliente"/>
+        <relationship name="producto" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Producto" inverseName="ventas" inverseEntity="Producto"/>
+    </entity>
+</model>
