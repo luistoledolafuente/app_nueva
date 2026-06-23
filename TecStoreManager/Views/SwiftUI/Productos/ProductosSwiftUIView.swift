@@ -41,7 +41,7 @@ struct ProductosSwiftUIView: View {
         }
         .sheet(isPresented: $showForm, onDismiss: { vm.cargar() }) {
             ProductoFormSwiftUIView(producto: selected, vm: vm)
-                .id(selected?.idProducto ?? "new")
+                .id(selected?.idProducto?.uuidString ?? "new")
         }
         .alert("Eliminar producto", isPresented: $showDeleteAlert) {
             Button("Eliminar", role: .destructive) { if let p = toDelete { vm.eliminar(p) } }
