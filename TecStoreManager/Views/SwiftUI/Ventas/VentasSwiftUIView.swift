@@ -373,7 +373,7 @@ struct VentaFormSwiftUIView: View {
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 16)
-                                    .background(.npRose)
+                                    .background(Color.npRose)
                                     .cornerRadius(14)
                             }
                             .padding(.top, 14)
@@ -424,7 +424,7 @@ struct VentaFormSwiftUIView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(.npSlate)
+                    .background(Color.npSlate)
                     .cornerRadius(12)
             } else if cantidad > 0 {
                 VStack(spacing: 2) {
@@ -432,7 +432,7 @@ struct VentaFormSwiftUIView: View {
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.white)
                         .frame(width: 18, height: 18)
-                        .background(.npRose)
+                        .background(Color.npRose)
                         .clipShape(Circle())
                     Button("+1") {
                         agregarProducto(producto)
@@ -441,7 +441,7 @@ struct VentaFormSwiftUIView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 7)
-                    .background(.npSecondary)
+                    .background(Color.npSecondary)
                     .cornerRadius(14)
                 }
             } else {
@@ -452,7 +452,7 @@ struct VentaFormSwiftUIView: View {
                 .foregroundColor(.white)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(.npRose)
+                .background(Color.npRose)
                 .cornerRadius(16)
             }
         }
