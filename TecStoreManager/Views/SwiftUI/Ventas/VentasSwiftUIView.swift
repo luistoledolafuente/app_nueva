@@ -333,7 +333,7 @@ struct VentaFormSwiftUIView: View {
                                 if itemsCarrito.isEmpty {
                                     HStack {
                                         Spacer()
-                                        Text("Toca \"AGREGAR\" en los productos de arriba 🛒")
+                                        Text("Toca \"AGREGAR\" en los productos de arriba")
                                             .font(.system(size: 13))
                                             .foregroundColor(Color(hex: "#78716C"))
                                             .padding(.vertical, 20)
@@ -366,16 +366,17 @@ struct VentaFormSwiftUIView: View {
                                     .cornerRadius(14)
                                     .shadow(color: Color.black.opacity(0.04), radius: 4)
 
-                                    Button(action: registrar) {
-                                        Text("Registrar Venta")
-                                            .font(.system(size: 16, weight: .bold))
-                                            .foregroundColor(.white)
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, 16)
-                                            .background(Color(hex: "#F43F5E"))
-                                            .cornerRadius(14)
-                                    }
-                                    .padding(.top, 14)
+                            Button(action: registrar) {
+                                let totalItems = itemsCarrito.reduce(0) { $0 + $1.cantidad }
+                                Text("Registrar Venta (\(totalItems) item\(totalItems != 1 ? "s" : ""))")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(Color(hex: "#F43F5E"))
+                                    .cornerRadius(14)
+                            }
+                            .padding(.top, 14)
                                 }
                                 .padding(.horizontal, 18)
                                 .padding(.vertical, 14)
