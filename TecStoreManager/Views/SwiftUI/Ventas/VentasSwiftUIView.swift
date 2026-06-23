@@ -1,6 +1,5 @@
 import SwiftUI
 
-// MARK: - Sales List
 struct VentasSwiftUIView: View {
     @StateObject private var vm    = VentaViewModel()
     @State private var search      = ""
@@ -22,13 +21,15 @@ struct VentasSwiftUIView: View {
             salesList
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color.tsBg.ignoresSafeArea())
+        .background(Color.npBg.ignoresSafeArea())
+        .navigationTitle("Ventas")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { showForm = true } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 22))
-                        .foregroundColor(.tsEmerald)
+                        .foregroundColor(.npEmerald)
                 }
             }
         }
@@ -44,49 +45,51 @@ struct VentasSwiftUIView: View {
         .onAppear { vm.cargar() }
     }
 
-    // MARK: - Header compacto
     private var headerBlock: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 10) {
             HStack(spacing: 6) {
                 Image(systemName: "cart.fill")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.tsEmerald)
+                    .foregroundColor(.npEmerald)
                 Text("\(vm.totalVentas()) ventas")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.tsText)
+                    .foregroundColor(.npPrimary)
                 Spacer()
                 Text("\(displayed.count) resultados")
                     .font(.system(size: 12))
-                    .foregroundColor(.tsSlate)
+                    .foregroundColor(.npSlate)
             }
 
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.tsEmerald)
+                    .foregroundColor(.npSlate)
                     .font(.system(size: 15, weight: .medium))
-                TextField("Buscar por cliente...", text: $search)
+                TextField("", text: $search, prompt: Text("Buscar por cliente...").foregroundColor(.npSlate))
                     .font(.system(size: 15))
+                    .foregroundColor(.npPrimary)
                 if !search.isEmpty {
                     Button { search = "" } label: {
-                        Image(systemName: "xmark.circle.fill").foregroundColor(.tsSlate)
+                        Image(systemName: "xmark.circle.fill").foregroundColor(.npSlate)
                     }
                 }
             }
-            .padding(13)
-            .background(Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-            .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
+            .padding(10)
+            .overlay(
+                Rectangle()
+                    .fill(!search.isEmpty ? Color.npEmerald : Color.npBorder)
+                    .frame(height: 1),
+                alignment: .bottom
+            )
         }
         .padding(.horizontal, 18)
         .padding(.top, 10)
         .padding(.bottom, 10)
     }
 
-    // MARK: - List
     @ViewBuilder
     private var salesList: some View {
         if displayed.isEmpty {
-            TSEmptyState(
+            NPEmptyState(
                 icon: "cart",
                 title: "Sin ventas",
                 subtitle: search.isEmpty ? "Registra tu primera venta" : "No se encontraron resultados"
@@ -110,7 +113,6 @@ struct VentasSwiftUIView: View {
     }
 }
 
-// MARK: - Venta Card
 private struct VentaCard: View {
     let venta: Venta
 
@@ -119,30 +121,35 @@ private struct VentaCard: View {
     }
 
     var body: some View {
-        TSCard {
+        NPTopCard(color: .npEmerald) {
             HStack(spacing: 14) {
-                TSAvatar(name: clienteName, gradient: .ventas)
+                NPAvatar(name: clienteName, gradient: .ventas)
                 VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Text(venta.codigoVenta ?? "---")
+                            .font(.system(size: 12, weight: .bold, design: .monospaced))
+                            .foregroundColor(.npEmerald)
+                        NPBadge(text: "x\(venta.cantidad)", color: .npSecondary)
+                    }
                     Text(clienteName)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.tsText)
+                        .foregroundColor(.npPrimary)
                     HStack(spacing: 6) {
-                        Image(systemName: "shippingbox").font(.caption2).foregroundColor(.tsSlate)
+                        Image(systemName: "shippingbox").font(.caption2).foregroundColor(.npSlate)
                         Text(venta.producto?.nombre ?? "-")
-                            .font(.system(size: 13)).foregroundColor(.tsSlate).lineLimit(1)
+                            .font(.system(size: 13)).foregroundColor(.npSlate).lineLimit(1)
                     }
                     HStack(spacing: 6) {
-                        Image(systemName: "calendar").font(.caption2).foregroundColor(.tsSlate)
+                        Image(systemName: "calendar").font(.caption2).foregroundColor(.npSlate)
                         Text(formatDate(venta.fechaVenta))
-                            .font(.system(size: 12)).foregroundColor(.tsSlate)
+                            .font(.system(size: 12)).foregroundColor(.npSlate)
                     }
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 6) {
                     Text(formatCurrency(venta.total))
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.tsEmerald)
-                    TSBadge(text: "x\(venta.cantidad)", color: .tsBlue)
+                        .foregroundColor(.npEmerald)
                 }
             }
             .padding(14)
@@ -150,7 +157,6 @@ private struct VentaCard: View {
     }
 }
 
-// MARK: - Venta Form
 struct VentaFormSwiftUIView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var vm:     VentaViewModel
@@ -174,78 +180,111 @@ struct VentaFormSwiftUIView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.tsBg.ignoresSafeArea()
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 20) {
-                        ZStack {
-                            Circle().fill(ModuleGradient.ventas.gradient).frame(width: 80, height: 80)
-                            Image(systemName: "cart.badge.plus")
-                                .font(.system(size: 34, weight: .bold)).foregroundColor(.white)
-                        }
-                        .shadow(color: Color.tsEmerald.opacity(0.4), radius: 14, x: 0, y: 6)
-                        .padding(.top, 10)
-
-                        TSCard {
-                            VStack(spacing: 16) {
-                                pickerSection(label: "Cliente", icon: "person.fill") {
-                                    if activeClientes.isEmpty {
-                                        Text("No hay clientes activos").foregroundColor(.tsRed).font(.caption)
-                                    } else {
-                                        Picker("Cliente", selection: $clienteIdx) {
-                                            ForEach(activeClientes.indices, id: \.self) { i in
-                                                Text("\(activeClientes[i].nombres ?? "") \(activeClientes[i].apellidos ?? "")").tag(i)
-                                            }
-                                        }
-                                        .pickerStyle(.menu)
-                                        .pickerBackground()
-                                    }
-                                }
-
-                                pickerSection(label: "Producto", icon: "shippingbox.fill") {
-                                    if activeProductos.isEmpty {
-                                        Text("No hay productos disponibles").foregroundColor(.tsRed).font(.caption)
-                                    } else {
-                                        Picker("Producto", selection: $productoIdx) {
-                                            ForEach(activeProductos.indices, id: \.self) { i in
-                                                Text("\(activeProductos[i].nombre ?? "") · Stock: \(activeProductos[i].stock)").tag(i)
-                                            }
-                                        }
-                                        .pickerStyle(.menu)
-                                        .pickerBackground()
-                                    }
-                                }
-
-                                TSField(icon: "number", placeholder: "Cantidad",
-                                        text: $cantidad, keyboardType: .numberPad)
-
-                                if !activeProductos.isEmpty && !cantidad.isEmpty {
-                                    pricePreview
-                                }
-
-                                TSErrorBanner(message: error)
-
-                                Button("Registrar venta") {
-                                    guard !activeClientes.isEmpty, !activeProductos.isEmpty else {
-                                        error = "Selecciona cliente y producto"; return
-                                    }
-                                    if vm.crear(cantidadStr: cantidad,
-                                                cliente: activeClientes[clienteIdx],
-                                                producto: activeProductos[productoIdx]) {
-                                        dismiss()
-                                    } else { error = vm.errorMessage }
-                                }
-                                .buttonStyle(TSPrimaryButtonStyle(gradient: .ventas))
+                Color.npBg.ignoresSafeArea()
+                VStack(spacing: 0) {
+                    LinearGradient(
+                        colors: [Color.npEmerald, Color(hex: "#047857")],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(height: 6)
+                    .ignoresSafeArea()
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 20) {
+                            ZStack {
+                                PolygonShape(sides: 6)
+                                    .fill(NPGradient.ventas.gradient)
+                                    .frame(width: 80, height: 80)
+                                Image(systemName: "cart.badge.plus")
+                                    .font(.system(size: 34, weight: .bold)).foregroundColor(.white)
                             }
-                            .padding(20)
+                            .shadow(color: Color.npEmerald.opacity(0.4), radius: 14, x: 0, y: 6)
+                            .padding(.top, 10)
+
+                            NPTopCard(color: .npEmerald) {
+                                VStack(spacing: 18) {
+                                    Text("Nueva Venta")
+                                        .font(.system(size: 18, weight: .bold))
+                                        .foregroundColor(.npPrimary)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                                    pickerSection(label: "Cliente", icon: "person.fill") {
+                                        if activeClientes.isEmpty {
+                                            Text("No hay clientes activos").foregroundColor(.npDanger).font(.caption)
+                                        } else {
+                                            Picker("Cliente", selection: $clienteIdx) {
+                                                ForEach(activeClientes.indices, id: \.self) { i in
+                                                    Text("\(activeClientes[i].nombres ?? "") \(activeClientes[i].apellidos ?? "")").tag(i)
+                                                }
+                                            }
+                                            .pickerStyle(.menu)
+                                            .pickerBackground()
+                                        }
+                                    }
+
+                                    pickerSection(label: "Producto", icon: "shippingbox.fill") {
+                                        if activeProductos.isEmpty {
+                                            Text("No hay productos disponibles").foregroundColor(.npDanger).font(.caption)
+                                        } else {
+                                            Picker("Producto", selection: $productoIdx) {
+                                                ForEach(activeProductos.indices, id: \.self) { i in
+                                                    Text("\(activeProductos[i].nombre ?? "") · Stock: \(activeProductos[i].stock)").tag(i)
+                                                }
+                                            }
+                                            .pickerStyle(.menu)
+                                            .pickerBackground()
+                                        }
+                                    }
+
+                                    HStack {
+                                        Image(systemName: "doc.text.fill")
+                                            .foregroundColor(.npEmerald)
+                                            .font(.system(size: 13))
+                                        Text("FV-XXXXX")
+                                            .font(.system(size: 13, weight: .bold, design: .monospaced))
+                                            .foregroundColor(.npSlate)
+                                        Text("• Código auto-generado")
+                                            .font(.caption)
+                                            .foregroundColor(.npSlate)
+                                        Spacer()
+                                    }
+                                    .padding(12)
+                                    .background(Color.npBg)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6))
+
+                                    NPField(icon: "number", placeholder: "Cantidad",
+                                            text: $cantidad, keyboardType: .numberPad)
+
+                                    if !activeProductos.isEmpty && !cantidad.isEmpty {
+                                        pricePreview
+                                    }
+
+                                    NPErrorBanner(message: error)
+
+                                    Button("Registrar venta") {
+                                        guard !activeClientes.isEmpty, !activeProductos.isEmpty else {
+                                            error = "Selecciona cliente y producto"; return
+                                        }
+                                        if vm.crear(cantidadStr: cantidad,
+                                                    cliente: activeClientes[clienteIdx],
+                                                    producto: activeProductos[productoIdx]) {
+                                            dismiss()
+                                        } else { error = vm.errorMessage }
+                                    }
+                                    .buttonStyle(NPWPButtonStyle(color: .npEmerald))
+                                }
+                                .padding(20)
+                            }
                         }
+                        .padding(.horizontal, 18).padding(.bottom, 30)
                     }
-                    .padding(.horizontal, 18).padding(.bottom, 30)
                 }
             }
-            .navigationTitle("Nueva Venta")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }
+                    .foregroundColor(.npPrimary) }
             }
         }
     }
@@ -255,7 +294,7 @@ struct VentaFormSwiftUIView: View {
         VStack(alignment: .leading, spacing: 8) {
             Label(label, systemImage: icon)
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(.tsSlate)
+                .foregroundColor(.npSlate)
             content()
         }
     }
@@ -263,35 +302,36 @@ struct VentaFormSwiftUIView: View {
     private var pricePreview: some View {
         VStack(spacing: 0) {
             Text("Resumen de venta")
-                .font(.system(size: 13, weight: .bold)).foregroundColor(.tsSlate)
+                .font(.system(size: 13, weight: .bold)).foregroundColor(.npSlate)
                 .frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 10)
-            HStack { Text("Subtotal").foregroundColor(.tsSlate); Spacer()
-                Text(formatCurrency(preview.subtotal)).foregroundColor(.tsText).bold() }
+            HStack { Text("Subtotal").foregroundColor(.npSlate); Spacer()
+                Text(formatCurrency(preview.subtotal)).foregroundColor(.npPrimary).bold() }
             Divider().padding(.vertical, 6)
-            HStack { Text("IGV (18%)").foregroundColor(.tsSlate); Spacer()
-                Text(formatCurrency(preview.igv)).foregroundColor(.tsAmber).bold() }
+            HStack { Text("IGV (18%)").foregroundColor(.npSlate); Spacer()
+                Text(formatCurrency(preview.igv)).foregroundColor(.npAmber).bold() }
             Divider().padding(.vertical, 6)
             HStack {
-                Text("TOTAL").font(.system(size: 15, weight: .bold)).foregroundColor(.tsText)
+                Text("TOTAL").font(.system(size: 15, weight: .bold)).foregroundColor(.npPrimary)
                 Spacer()
                 Text(formatCurrency(preview.total))
-                    .font(.system(size: 18, weight: .bold, design: .rounded)).foregroundColor(.tsEmerald)
+                    .font(.system(size: 18, weight: .bold, design: .rounded)).foregroundColor(.npEmerald)
             }
         }
         .padding(16)
-        .background(Color(hex: "#F0FDF4"))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.tsEmerald.opacity(0.3), lineWidth: 1))
+        .background(Color.npBg)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.npEmerald.opacity(0.3), lineWidth: 1))
     }
 }
 
-// Helper para estilo de picker
+
+
 private extension View {
     func pickerBackground() -> some View {
         self
             .padding(12)
-            .background(Color(hex: "#F8FAFC"))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.tsIndigo.opacity(0.18), lineWidth: 1))
+            .background(Color.npBg)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.npBorder, lineWidth: 0.5))
     }
 }

@@ -2,9 +2,10 @@ import UIKit
 
 class RegisterViewController: UIViewController {
 
-    // MARK: - IBOutlets (storyboard — no tocar)
+    // MARK: - IBOutlets (storyboard — no tocar, mantener nombres)
     @IBOutlet weak var nombreField:    UITextField!
-    @IBOutlet weak var usuarioField:   UITextField!
+    @IBOutlet weak var usuarioField:   UITextField! // usado como email
+    var emailField: UITextField { usuarioField }
     @IBOutlet weak var passwordField:  UITextField!
     @IBOutlet weak var confirmField:   UITextField!
     @IBOutlet weak var errorLabel:     UILabel!
@@ -51,7 +52,6 @@ class RegisterViewController: UIViewController {
         circleTop.layer.cornerRadius    = 130
         circleBottom.layer.cornerRadius = 115
 
-        // Card: desde arriba del primer campo hasta abajo del backButton
         let hPad: CGFloat   = 18
         let cardTop: CGFloat = nombreField.frame.minY - 76
         let cardBot: CGFloat = backButton.frame.maxY + 22
@@ -75,14 +75,14 @@ class RegisterViewController: UIViewController {
         btnGradientLayer.cornerRadius = registerButton.layer.cornerRadius
 
         attachIcon("person.text.rectangle", to: nombreField)
-        attachIcon("at",                     to: usuarioField)
+        attachIcon("envelope.fill",          to: emailField)
         attachIcon("lock.fill",              to: passwordField)
         attachIcon("lock.shield.fill",       to: confirmField)
     }
 
     // MARK: - Ocultar elementos del storyboard sin outlet
     private func hideStoryboardDecorations() {
-        let outlets: [UIView?] = [nombreField, usuarioField, passwordField,
+        let outlets: [UIView?] = [nombreField, emailField, passwordField,
                                    confirmField, errorLabel, registerButton, backButton]
         let keep = Set(outlets.compactMap { $0 })
         view.subviews.forEach { if !keep.contains($0) { $0.isHidden = true } }
@@ -91,9 +91,9 @@ class RegisterViewController: UIViewController {
     // MARK: - Fondo gradiente
     private func buildBackground() {
         gradientLayer.colors = [
-            UIColor(hex: "#0E7490").cgColor,
-            UIColor(hex: "#06B6D4").cgColor,
-            UIColor(hex: "#3B82F6").cgColor
+            UIColor(hex: "#0F766E").cgColor,
+            UIColor(hex: "#0D9488").cgColor,
+            UIColor(hex: "#0891B2").cgColor
         ]
         gradientLayer.locations   = [0, 0.55, 1]
         gradientLayer.startPoint  = CGPoint(x: 0, y: 0)
@@ -160,35 +160,36 @@ class RegisterViewController: UIViewController {
     private func buildCardLabels() {
         cardTitleLabel.text      = "Crear cuenta"
         cardTitleLabel.font      = .systemFont(ofSize: 22, weight: .bold)
-        cardTitleLabel.textColor = UIColor(hex: "#1E2024")
+        cardTitleLabel.textColor = .black
         view.addSubview(cardTitleLabel)
 
         cardSubtitleLabel.text      = "Completa tus datos para registrarte"
         cardSubtitleLabel.font      = .systemFont(ofSize: 13)
-        cardSubtitleLabel.textColor = UIColor(hex: "#64748B")
+        cardSubtitleLabel.textColor = UIColor(hex: "#475569")
         view.addSubview(cardSubtitleLabel)
     }
 
     // MARK: - Estilo de campos
     private func styleFields() {
-        let fields: [UITextField?] = [nombreField, usuarioField, passwordField, confirmField]
+        let fields: [UITextField?] = [nombreField, emailField, passwordField, confirmField]
         for field in fields {
             guard let f = field else { continue }
-            f.textColor           = UIColor(hex: "#1E2024")
-            f.backgroundColor     = UIColor(hex: "#F8FAFC")
+            f.textColor           = UIColor(hex: "#0F172A")
+            f.backgroundColor     = UIColor(hex: "#F0FDF4")
             f.font                = .systemFont(ofSize: 15)
             f.layer.cornerRadius  = 13
             f.layer.borderWidth   = 1
-            f.layer.borderColor   = UIColor(hex: "#06B6D4").withAlphaComponent(0.22).cgColor
+            f.layer.borderColor   = UIColor(hex: "#0D9488").withAlphaComponent(0.18).cgColor
             f.layer.masksToBounds = true
         }
         passwordField.isSecureTextEntry = true
         confirmField.isSecureTextEntry  = true
 
         nombreField.attributedPlaceholder   = placeholder("Nombre completo")
-        usuarioField.attributedPlaceholder  = placeholder("Usuario")
+        emailField.attributedPlaceholder    = placeholder("Correo electrónico")
         passwordField.attributedPlaceholder = placeholder("Contraseña")
         confirmField.attributedPlaceholder  = placeholder("Confirmar contraseña")
+        emailField.keyboardType = .emailAddress
     }
 
     private func attachIcon(_ systemName: String, to field: UITextField) {
@@ -196,7 +197,7 @@ class RegisterViewController: UIViewController {
         let config    = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
         let img       = UIImageView(image: UIImage(systemName: systemName,
                                                     withConfiguration: config))
-        img.tintColor   = UIColor(hex: "#64748B")
+        img.tintColor   = UIColor(hex: "#475569")
         img.contentMode = .scaleAspectFit
         let iconH: CGFloat = 18
         img.frame = CGRect(x: 13, y: (container.frame.height - iconH) / 2,
@@ -208,7 +209,7 @@ class RegisterViewController: UIViewController {
 
     private func placeholder(_ text: String) -> NSAttributedString {
         NSAttributedString(string: text,
-                           attributes: [.foregroundColor: UIColor(hex: "#64748B")])
+                           attributes: [.foregroundColor: UIColor(hex: "#475569")])
     }
 
     // MARK: - Botón crear cuenta
@@ -219,13 +220,13 @@ class RegisterViewController: UIViewController {
         registerButton.layer.cornerRadius  = 14
         registerButton.layer.masksToBounds = false
 
-        btnGradientLayer.colors     = [UIColor(hex: "#06B6D4").cgColor,
-                                        UIColor(hex: "#3B82F6").cgColor]
+        btnGradientLayer.colors     = [UIColor(hex: "#0D9488").cgColor,
+                                        UIColor(hex: "#0F766E").cgColor]
         btnGradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
         btnGradientLayer.endPoint   = CGPoint(x: 1, y: 0.5)
         registerButton.layer.insertSublayer(btnGradientLayer, at: 0)
 
-        registerButton.layer.shadowColor   = UIColor(hex: "#06B6D4").cgColor
+        registerButton.layer.shadowColor   = UIColor(hex: "#0D9488").cgColor
         registerButton.layer.shadowOpacity = 0.40
         registerButton.layer.shadowRadius  = 14
         registerButton.layer.shadowOffset  = CGSize(width: 0, height: 6)
@@ -235,12 +236,12 @@ class RegisterViewController: UIViewController {
     private func styleBackButton() {
         let attr = NSMutableAttributedString(
             string: "¿Ya tienes cuenta? ",
-            attributes: [.foregroundColor: UIColor(hex: "#64748B"),
+            attributes: [.foregroundColor: UIColor(hex: "#475569"),
                          .font: UIFont.systemFont(ofSize: 14)]
         )
         attr.append(NSAttributedString(
             string: "Inicia sesión",
-            attributes: [.foregroundColor: UIColor(hex: "#06B6D4"),
+            attributes: [.foregroundColor: UIColor(hex: "#0D9488"),
                          .font: UIFont.systemFont(ofSize: 14, weight: .bold)]
         ))
         backButton.setAttributedTitle(attr, for: .normal)
@@ -261,7 +262,7 @@ class RegisterViewController: UIViewController {
         animateButtonPress(sender)
 
         let nombre  = nombreField.text   ?? ""
-        let user    = usuarioField.text  ?? ""
+        let email   = emailField.text    ?? ""
         let pass    = passwordField.text ?? ""
         let confirm = confirmField.text  ?? ""
 
@@ -271,19 +272,36 @@ class RegisterViewController: UIViewController {
             return
         }
 
-        if authViewModel.registrar(nombreUsuario: user, password: pass, nombreCompleto: nombre) {
-            let alert = UIAlertController(
-                title: "¡Cuenta creada!",
-                message: "Tu cuenta fue registrada exitosamente. Ya puedes iniciar sesión.",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "Iniciar sesión", style: .default) { _ in
-                self.navigationController?.popViewController(animated: true)
-            })
-            present(alert, animated: true)
-        } else {
-            errorLabel.text = authViewModel.errorMessage
+        guard !nombre.isEmpty, !email.isEmpty else {
+            errorLabel.text = "Todos los campos son obligatorios"
             shakeView(errorLabel)
+            return
+        }
+
+        registerButton.isEnabled = false
+        registerButton.setTitle("Creando cuenta...", for: .normal)
+        Task {
+            let exito = await authViewModel.register(
+                email: email,
+                password: pass,
+                nombreCompleto: nombre
+            )
+            registerButton.isEnabled = true
+            registerButton.setTitle("Crear cuenta", for: .normal)
+            if exito {
+                let alert = UIAlertController(
+                    title: "¡Cuenta creada!",
+                    message: "Tu cuenta fue registrada exitosamente. Ya puedes iniciar sesión.",
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "Iniciar sesión", style: .default) { _ in
+                    self.navigationController?.popViewController(animated: true)
+                })
+                present(alert, animated: true)
+            } else {
+                errorLabel.text = authViewModel.errorMessage
+                shakeView(errorLabel)
+            }
         }
     }
 

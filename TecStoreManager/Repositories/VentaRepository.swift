@@ -8,6 +8,17 @@ class VentaRepository {
         self.context = context
     }
     
+    // MARK: - Generar código de venta
+    private func generarCodigoVenta() -> String {
+        let request: NSFetchRequest<Venta> = Venta.fetchRequest()
+        request.predicate = NSPredicate(format: "codigoVenta != nil")
+        request.sortDescriptors = [NSSortDescriptor(key: "codigoVenta", ascending: false)]
+        request.fetchLimit = 1
+        let ultimo = (try? context.fetch(request))?.first?.codigoVenta ?? "FV-00000"
+        let numero = Int(ultimo.dropFirst(3)) ?? 0
+        return String(format: "FV-%05d", numero + 1)
+    }
+
     // MARK: - Crear
     func crear(cantidad: Int, precio: Double, cliente: Cliente, producto: Producto) {
         let subtotal = Double(cantidad) * precio
@@ -15,15 +26,16 @@ class VentaRepository {
         let total    = subtotal + igv
         
         let venta = Venta(context: context)
-        venta.idVenta    = UUID()
-        venta.fechaVenta = Date()
-        venta.cantidad   = Int32(cantidad)
-        venta.precio     = precio
-        venta.subtotal   = subtotal
-        venta.igv        = igv
-        venta.total      = total
-        venta.cliente    = cliente
-        venta.producto   = producto
+        venta.idVenta     = UUID()
+        venta.codigoVenta = generarCodigoVenta()
+        venta.fechaVenta  = Date()
+        venta.cantidad    = Int32(cantidad)
+        venta.precio      = precio
+        venta.subtotal    = subtotal
+        venta.igv         = igv
+        venta.total       = total
+        venta.cliente     = cliente
+        venta.producto    = producto
         
         producto.stock -= Int32(cantidad)
         

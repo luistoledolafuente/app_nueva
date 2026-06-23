@@ -1,16 +1,26 @@
 import SwiftUI
 
 struct ConfiguracionSwiftUIView: View {
-    @State private var darkMode    = false
-    @State private var stockAlerts = true
-    @State private var reminders   = false
+    @AppStorage("darkMode")   private var darkMode    = false
+    @AppStorage("stockAlerts") private var stockAlerts = true {
+        didSet { if stockAlerts { NotificationManager.shared.scheduleDailyStockCheck() } }
+    }
+    @AppStorage("reminders")  private var reminders   = false {
+        didSet {
+            if reminders {
+                NotificationManager.shared.scheduleDailyStockCheck()
+            } else {
+                NotificationManager.shared.cancelAll()
+            }
+        }
+    }
 
     var body: some View {
         ZStack {
-            Color.tsBg.ignoresSafeArea()
+            Color.npBg.ignoresSafeArea()
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 20) {
-                    appHeader
+                VStack(spacing: 16) {
+                    profileHeader
                     aparienciaCard
                     notifCard
                     fiscalCard
@@ -25,30 +35,26 @@ struct ConfiguracionSwiftUIView: View {
         .navigationBarTitleDisplayMode(.large)
     }
 
-    // MARK: - App Header
-    private var appHeader: some View {
-        TSCard {
+    private var profileHeader: some View {
+        NPTopCard(color: .npSlate2) {
             HStack(spacing: 16) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 18)
-                        .fill(ModuleGradient.productos.gradient)
-                        .frame(width: 64, height: 64)
-                    Image(systemName: "cart.fill.badge.plus")
-                        .font(.system(size: 28, weight: .bold))
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(NPGradient.configuracion.gradient)
+                        .frame(width: 60, height: 60)
+                    Image(systemName: "gearshape.2.fill")
+                        .font(.system(size: 26, weight: .bold))
                         .foregroundColor(.white)
                 }
-                .shadow(color: Color.tsIndigo.opacity(0.4), radius: 10, x: 0, y: 4)
+                .shadow(color: NPGradient.configuracion.start.opacity(0.3), radius: 8, x: 0, y: 4)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("TecStore Manager")
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Configuración")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.tsText)
-                    Text("Versión 1.0.0")
+                        .foregroundColor(.npPrimary)
+                    Text("Personaliza tu experiencia")
                         .font(.subheadline)
-                        .foregroundColor(.tsSlate)
-                    Text("Gestión inteligente")
-                        .font(.caption)
-                        .foregroundColor(.tsSlate)
+                        .foregroundColor(.npSlate)
                 }
                 Spacer()
             }
@@ -56,35 +62,33 @@ struct ConfiguracionSwiftUIView: View {
         }
     }
 
-    // MARK: - Apariencia
     private var aparienciaCard: some View {
-        TSCard {
+        NPTopCard(color: .npSecondary) {
             VStack(spacing: 0) {
-                sectionHeader(icon: "paintbrush.fill", title: "Apariencia", color: .tsIndigo)
+                sectionHeader(icon: "paintbrush.fill", title: "Apariencia", color: .npSecondary)
                 Divider().padding(.horizontal, 16)
                 ConfigToggleRow(
                     icon: "moon.fill",
                     label: "Modo oscuro",
                     subtitle: "Interfaz oscura",
                     isOn: $darkMode,
-                    color: .tsPurple
+                    color: .npViolet
                 )
             }
         }
     }
 
-    // MARK: - Notificaciones
     private var notifCard: some View {
-        TSCard {
+        NPTopCard(color: .npAmber) {
             VStack(spacing: 0) {
-                sectionHeader(icon: "bell.fill", title: "Notificaciones", color: .tsAmber)
+                sectionHeader(icon: "bell.fill", title: "Notificaciones", color: .npAmber)
                 Divider().padding(.horizontal, 16)
                 ConfigToggleRow(
                     icon: "exclamationmark.triangle.fill",
                     label: "Alertas de stock bajo",
                     subtitle: "Cuando stock ≤ 5 unidades",
                     isOn: $stockAlerts,
-                    color: .tsRed
+                    color: .npDanger
                 )
                 Divider().padding(.horizontal, 16)
                 ConfigToggleRow(
@@ -92,36 +96,34 @@ struct ConfiguracionSwiftUIView: View {
                     label: "Recordatorios",
                     subtitle: "Notificaciones diarias",
                     isOn: $reminders,
-                    color: .tsBlue
+                    color: .npSecondary
                 )
             }
         }
     }
 
-    // MARK: - Fiscal
     private var fiscalCard: some View {
-        TSCard {
+        NPTopCard(color: .npEmerald) {
             VStack(spacing: 0) {
-                sectionHeader(icon: "doc.text.fill", title: "Fiscal", color: .tsEmerald)
+                sectionHeader(icon: "doc.text.fill", title: "Fiscal", color: .npEmerald)
                 Divider().padding(.horizontal, 16)
-                ConfigInfoRow(icon: "percent",       label: "Tasa IGV",  value: "18%",     color: .tsAmber)
+                ConfigInfoRow(icon: "percent",       label: "Tasa IGV",  value: "18%",     color: .npAmber)
                 Divider().padding(.horizontal, 16)
-                ConfigInfoRow(icon: "dollarsign",    label: "Moneda",    value: "S/. (PEN)", color: .tsEmerald)
+                ConfigInfoRow(icon: "dollarsign",    label: "Moneda",    value: "S/. (PEN)", color: .npEmerald)
             }
         }
     }
 
-    // MARK: - Version
     private var versionCard: some View {
-        TSCard {
+        NPTopCard(color: .npSlate2) {
             VStack(spacing: 0) {
-                sectionHeader(icon: "info.circle.fill", title: "Acerca de", color: .tsSlate)
+                sectionHeader(icon: "info.circle.fill", title: "Acerca de", color: .npSlate2)
                 Divider().padding(.horizontal, 16)
-                ConfigInfoRow(icon: "hammer.fill",   label: "Tecnología",   value: "SwiftUI + CoreData", color: .tsBlue)
+                ConfigInfoRow(icon: "hammer.fill",   label: "Tecnología",   value: "SwiftUI + CoreData", color: .npSecondary)
                 Divider().padding(.horizontal, 16)
-                ConfigInfoRow(icon: "cpu",            label: "Arquitectura", value: "MVVM + Repository",  color: .tsPurple)
+                ConfigInfoRow(icon: "cpu",            label: "Arquitectura", value: "MVVM + Repository",  color: .npViolet)
                 Divider().padding(.horizontal, 16)
-                ConfigInfoRow(icon: "tag.fill",       label: "Versión",      value: "1.0.0",              color: .tsSlate)
+                ConfigInfoRow(icon: "tag.fill",       label: "Versión",      value: "1.0.0",              color: .npSlate2)
             }
         }
     }
@@ -133,7 +135,7 @@ struct ConfiguracionSwiftUIView: View {
                 .font(.system(size: 15, weight: .semibold))
             Text(title)
                 .font(.system(size: 14, weight: .bold))
-                .foregroundColor(.tsSlate)
+                .foregroundColor(.npSlate)
                 .textCase(.uppercase)
                 .tracking(0.8)
         }
@@ -143,7 +145,6 @@ struct ConfiguracionSwiftUIView: View {
     }
 }
 
-// MARK: - Toggle Row
 private struct ConfigToggleRow: View {
     let icon:     String
     let label:    String
@@ -154,7 +155,7 @@ private struct ConfigToggleRow: View {
     var body: some View {
         HStack(spacing: 14) {
             ZStack {
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 6)
                     .fill(color.opacity(0.12))
                     .frame(width: 34, height: 34)
                 Image(systemName: icon)
@@ -164,10 +165,10 @@ private struct ConfigToggleRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.tsText)
+                    .foregroundColor(.npPrimary)
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.tsSlate)
+                    .foregroundColor(.npSlate)
             }
             Spacer()
             Toggle("", isOn: $isOn)
@@ -179,7 +180,6 @@ private struct ConfigToggleRow: View {
     }
 }
 
-// MARK: - Info Row
 private struct ConfigInfoRow: View {
     let icon:  String
     let label: String
@@ -189,7 +189,7 @@ private struct ConfigInfoRow: View {
     var body: some View {
         HStack(spacing: 14) {
             ZStack {
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 6)
                     .fill(color.opacity(0.12))
                     .frame(width: 34, height: 34)
                 Image(systemName: icon)
@@ -198,11 +198,11 @@ private struct ConfigInfoRow: View {
             }
             Text(label)
                 .font(.system(size: 15, weight: .medium))
-                .foregroundColor(.tsText)
+                .foregroundColor(.npPrimary)
             Spacer()
             Text(value)
                 .font(.system(size: 14))
-                .foregroundColor(.tsSlate)
+                .foregroundColor(.npSlate)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)

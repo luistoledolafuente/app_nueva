@@ -12,7 +12,7 @@ struct MapaSwiftUIView: View {
 
     var body: some View {
         ZStack {
-            Color.tsBg.ignoresSafeArea()
+            Color.npBg.ignoresSafeArea()
             VStack(spacing: 0) {
                 mapSection
                 controlPanel
@@ -26,7 +26,7 @@ struct MapaSwiftUIView: View {
                     showSaved = true
                 } label: {
                     Image(systemName: "list.bullet.rectangle")
-                        .foregroundColor(.tsRed)
+                        .foregroundColor(.npOrange)
                 }
             }
         }
@@ -38,7 +38,6 @@ struct MapaSwiftUIView: View {
         .onAppear { vm.solicitarPermiso() }
     }
 
-    // MARK: - Map
     private var mapSection: some View {
         ZStack(alignment: .bottomTrailing) {
             Map(coordinateRegion: $region,
@@ -51,18 +50,18 @@ struct MapaSwiftUIView: View {
                     VStack(spacing: 4) {
                         ZStack {
                             Circle()
-                                .fill(ModuleGradient.mapa.gradient)
+                                .fill(NPGradient.mapa.gradient)
                                 .frame(width: 36, height: 36)
                             Image(systemName: "mappin")
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.white)
                         }
-                        .shadow(color: Color.tsRed.opacity(0.5), radius: 6, x: 0, y: 3)
+                        .shadow(color: Color.npOrange.opacity(0.5), radius: 6, x: 0, y: 3)
 
                         if let ref = loc.direccionReferencia, !ref.isEmpty {
                             Text(ref)
                                 .font(.system(size: 10, weight: .semibold))
-                                .foregroundColor(.tsText)
+                                .foregroundColor(.npPrimary)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 3)
                                 .background(Color.white)
@@ -73,16 +72,14 @@ struct MapaSwiftUIView: View {
                 }
             }
             .frame(height: 320)
-            .clipShape(RoundedRectangle(cornerRadius: 0))
 
-            // Current location overlay
             if vm.latitudActual != 0 {
                 HStack(spacing: 8) {
                     Image(systemName: "location.fill")
-                        .foregroundColor(.tsRed)
+                        .foregroundColor(.npOrange)
                     Text("\(String(format: "%.4f", vm.latitudActual)), \(String(format: "%.4f", vm.longitudActual))")
                         .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.tsText)
+                        .foregroundColor(.npPrimary)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -93,44 +90,42 @@ struct MapaSwiftUIView: View {
         }
     }
 
-    // MARK: - Controls
     private var controlPanel: some View {
         ScrollView(showsIndicators: false) {
-            VStack(spacing: 16) {
-                // Status card
-                TSCard {
-                    HStack(spacing: 16) {
+            VStack(spacing: 14) {
+                NPTopCard(color: .npOrange) {
+                    HStack(spacing: 14) {
                         ZStack {
                             Circle()
-                                .fill(ModuleGradient.mapa.gradient)
-                                .frame(width: 50, height: 50)
+                                .fill(NPGradient.mapa.gradient)
+                                .frame(width: 48, height: 48)
                             Image(systemName: "location.fill")
-                                .font(.system(size: 22))
+                                .font(.system(size: 20))
                                 .foregroundColor(.white)
                         }
                         VStack(alignment: .leading, spacing: 4) {
                             Text(vm.permisoConcedido ? "Ubicación activa" : "Sin permiso")
                                 .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(.tsText)
+                                .foregroundColor(.npPrimary)
                             if vm.latitudActual != 0 {
                                 Text("Lat \(String(format: "%.5f", vm.latitudActual))  Lon \(String(format: "%.5f", vm.longitudActual))")
                                     .font(.system(size: 11))
-                                    .foregroundColor(.tsSlate)
+                                    .foregroundColor(.npSlate)
                             } else {
                                 Text("Presiona obtener ubicación")
                                     .font(.caption)
-                                    .foregroundColor(.tsSlate)
+                                    .foregroundColor(.npSlate)
                             }
                         }
                         Spacer()
                         Circle()
-                            .fill(vm.permisoConcedido ? Color.tsEmerald : Color.tsRed)
+                            .fill(vm.permisoConcedido ? Color.npEmerald : Color.npDanger)
                             .frame(width: 10, height: 10)
                     }
-                    .padding(16)
+                    .padding(14)
                 }
 
-                TSField(icon: "mappin.and.ellipse",
+                NPField(icon: "mappin.and.ellipse",
                         placeholder: "Referencia (ej. Casa, Oficina)",
                         text: $referencia)
 
@@ -140,7 +135,7 @@ struct MapaSwiftUIView: View {
                     } label: {
                         Label("Obtener", systemImage: "location.fill")
                     }
-                    .buttonStyle(TSPrimaryButtonStyle(gradient: .mapa))
+                    .buttonStyle(NPWPButtonStyle(color: .npOrange))
 
                     Button {
                         vm.direccionReferencia = referencia
@@ -150,26 +145,26 @@ struct MapaSwiftUIView: View {
                     } label: {
                         Label("Guardar", systemImage: "bookmark.fill")
                     }
-                    .buttonStyle(TSPrimaryButtonStyle(gradient: .ventas))
+                    .buttonStyle(NPWPButtonStyle(color: .npEmerald))
                     .disabled(vm.latitudActual == 0)
                     .opacity(vm.latitudActual == 0 ? 0.5 : 1)
                 }
 
-                TSErrorBanner(message: vm.errorMessage)
+                NPErrorBanner(message: vm.errorMessage)
 
                 if !vm.ubicaciones.isEmpty {
                     HStack {
                         Text("Ubicaciones guardadas")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.tsSlate)
+                            .foregroundColor(.npSlate)
                         Spacer()
-                        TSBadge(text: "\(vm.ubicaciones.count)", color: .tsRed)
+                        NPBadge(text: "\(vm.ubicaciones.count)", color: .npOrange)
                     }
                 }
             }
             .padding(18)
         }
-        .background(Color.tsBg)
+        .background(Color.npBg)
     }
 
     private func updateRegion() {
@@ -183,7 +178,6 @@ struct MapaSwiftUIView: View {
     }
 }
 
-// MARK: - Saved Locations Sheet
 private struct SavedLocationsView: View {
     @ObservedObject var vm: UbicacionViewModel
     @Environment(\.dismiss) var dismiss
@@ -191,33 +185,33 @@ private struct SavedLocationsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.tsBg.ignoresSafeArea()
+                Color.npBg.ignoresSafeArea()
                 if vm.ubicaciones.isEmpty {
-                    TSEmptyState(icon: "map", title: "Sin ubicaciones", subtitle: "Guarda tu primera ubicación")
+                    NPEmptyState(icon: "map", title: "Sin ubicaciones", subtitle: "Guarda tu primera ubicación")
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 12) {
                             ForEach(vm.ubicaciones, id: \.idUbicacion) { loc in
-                                TSCard {
+                                NPTopCard(color: .npOrange) {
                                     HStack(spacing: 12) {
                                         ZStack {
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .fill(ModuleGradient.mapa.gradient)
-                                                .frame(width: 42, height: 42)
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(NPGradient.mapa.gradient)
+                                                .frame(width: 40, height: 40)
                                             Image(systemName: "mappin.circle.fill")
-                                                .font(.system(size: 20))
+                                                .font(.system(size: 18))
                                                 .foregroundColor(.white)
                                         }
                                         VStack(alignment: .leading, spacing: 3) {
                                             Text(loc.direccionReferencia ?? "Sin referencia")
                                                 .font(.system(size: 14, weight: .semibold))
-                                                .foregroundColor(.tsText)
+                                                .foregroundColor(.npPrimary)
                                             Text("\(String(format: "%.4f", loc.latitud)), \(String(format: "%.4f", loc.longitud))")
                                                 .font(.system(size: 12))
-                                                .foregroundColor(.tsSlate)
+                                                .foregroundColor(.npSlate)
                                             Text(formatDate(loc.fechaRegistro))
                                                 .font(.caption)
-                                                .foregroundColor(.tsSlate)
+                                                .foregroundColor(.npSlate)
                                         }
                                         Spacer()
                                     }

@@ -1,80 +1,82 @@
 import Foundation
 import CoreData
 import CryptoKit
+import UIKit
 
+@MainActor
 class AuthViewModel: ObservableObject {
-    
+
     @Published var usuarioActual: Usuario?
-    @Published var estaLogueado: Bool   = false
+    @Published var estaLogueado: Bool = false
     @Published var errorMessage: String = ""
-    
-    private let context: NSManagedObjectContext
-    
-    init(context: NSManagedObjectContext = PersistenceController.shared.context) {
-        self.context = context
-    }
-    
-    // MARK: - Login
-    func login(nombreUsuario: String, password: String) -> Bool {
-        guard Validators.isNotEmpty(nombreUsuario),
-              Validators.isNotEmpty(password) else {
-            errorMessage = "Usuario y contraseña son obligatorios"
-            return false
-        }
-        
-        let request: NSFetchRequest<Usuario> = Usuario.fetchRequest()
-        request.predicate = NSPredicate(
-            format: "nombreUsuario == %@ AND password == %@",
-            nombreUsuario, Self.hashPassword(password)
-        )
+    @Published var isLoading: Bool = false
 
-        if let usuario = try? context.fetch(request).first {
+    private let authService: FirebaseAuthService
+
+    init(authService: FirebaseAuthService = FirebaseAuthService()) {
+        self.authService = authService
+        verificarSesion()
+    }
+
+    func verificarSesion() {
+        if let usuario = authService.checkCurrentSession() {
             usuarioActual = usuario
-            estaLogueado  = true
-            errorMessage  = ""
-            return true
-        } else {
-            errorMessage = "Usuario o contraseña incorrectos"
-            return false
+            estaLogueado = true
         }
-    }
-    
-    // MARK: - Registro
-    func registrar(nombreUsuario: String, password: String, nombreCompleto: String) -> Bool {
-        guard Validators.isNotEmpty(nombreUsuario),
-              Validators.isNotEmpty(password),
-              Validators.isNotEmpty(nombreCompleto) else {
-            errorMessage = "Todos los campos son obligatorios"
-            return false
-        }
-        
-        let request: NSFetchRequest<Usuario> = Usuario.fetchRequest()
-        request.predicate = NSPredicate(format: "nombreUsuario == %@", nombreUsuario)
-        
-        if (try? context.fetch(request).first) != nil {
-            errorMessage = "El usuario ya existe"
-            return false
-        }
-        
-        let usuario = Usuario(context: context)
-        usuario.idUsuario      = UUID()
-        usuario.nombreUsuario  = nombreUsuario
-        usuario.password       = Self.hashPassword(password)
-        usuario.nombreCompleto = nombreCompleto
-        usuario.estado         = true
-        
-        PersistenceController.shared.save()
-        errorMessage = ""
-        return true
-    }
-    
-    // MARK: - Logout
-    func logout() {
-        usuarioActual = nil
-        estaLogueado  = false
     }
 
-    // MARK: - Hashing
+    func login(email: String, password: String) async {
+        isLoading = true
+        errorMessage = ""
+
+        let result = await authService.login(email: email, password: password)
+        switch result {
+        case .success(let usuario):
+            usuarioActual = usuario
+            estaLogueado = true
+        case .failure(let error):
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
+    }
+
+    func register(email: String, password: String, nombreCompleto: String) async -> Bool {
+        isLoading = true
+        errorMessage = ""
+
+        let result = await authService.register(email: email, password: password, nombreCompleto: nombreCompleto)
+        isLoading = false
+        switch result {
+        case .success:
+            errorMessage = ""
+            return true
+        case .failure(let error):
+            errorMessage = error.localizedDescription
+            return false
+        }
+    }
+
+    func signInWithGoogle(presenting viewController: UIViewController) async {
+        isLoading = true
+        errorMessage = ""
+
+        let result = await authService.signInWithGoogle(presenting: viewController)
+        switch result {
+        case .success(let usuario):
+            usuarioActual = usuario
+            estaLogueado = true
+        case .failure(let error):
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
+    }
+
+    func logout() {
+        authService.logout()
+        usuarioActual = nil
+        estaLogueado = false
+    }
+
     static func hashPassword(_ password: String) -> String {
         let digest = SHA256.hash(data: Data(password.utf8))
         return digest.map { String(format: "%02x", $0) }.joined()

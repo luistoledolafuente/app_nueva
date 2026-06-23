@@ -1,23 +1,23 @@
 import SwiftUI
 
 struct AcercaDeSwiftUIView: View {
-    @State private var logoRotation: Double = 0
     @State private var appeared = false
 
     private let techStack: [(String, String, Color)] = [
-        ("swift",         "SwiftUI",     .tsOrange),
-        ("cylinder.split.1x2.fill", "Core Data", .tsBlue),
-        ("cpu",           "MVVM",        .tsPurple),
-        ("building.columns.fill", "Repository Pattern", .tsTeal),
-        ("location.fill", "MapKit",      .tsRed),
-        ("lock.shield.fill", "CryptoKit", .tsEmerald),
+        ("swift",         "SwiftUI",     .npOrange),
+        ("cylinder.split.1x2.fill", "Core Data", .npSecondary),
+        ("cpu",           "MVVM",        .npViolet),
+        ("building.columns.fill", "Repository Pattern", .npRose),
+        ("location.fill", "MapKit",      .npDanger),
+        ("lock.shield.fill", "CryptoKit", .npEmerald),
+        ("flame.fill",    "Firebase",    .npAmber),
     ]
 
     var body: some View {
         ZStack {
-            Color.tsBg.ignoresSafeArea()
+            Color.npBg.ignoresSafeArea()
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
+                VStack(spacing: 20) {
                     heroSection
                     infoCard
                     techStackCard
@@ -32,50 +32,41 @@ struct AcercaDeSwiftUIView: View {
         .navigationTitle("Acerca de")
         .navigationBarTitleDisplayMode(.large)
         .onAppear {
-            withAnimation(.spring(response: 0.7, dampingFraction: 0.65).delay(0.1)) {
-                appeared = true
-            }
+            withAnimation(.easeOut(duration: 0.4)) { appeared = true }
         }
     }
 
-    // MARK: - Hero
     private var heroSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(ModuleGradient.acercaDe.gradient)
-                    .frame(width: 110, height: 110)
+                    .fill(NPGradient.acercaDe.gradient)
+                    .frame(width: 100, height: 100)
                 Circle()
                     .fill(Color.white.opacity(0.18))
-                    .frame(width: 88, height: 88)
+                    .frame(width: 80, height: 80)
                 Image(systemName: "cart.fill.badge.plus")
-                    .font(.system(size: 46, weight: .bold))
+                    .font(.system(size: 42, weight: .bold))
                     .foregroundColor(.white)
-                    .rotationEffect(.degrees(logoRotation))
             }
-            .shadow(color: Color.tsTeal.opacity(0.5), radius: 20, x: 0, y: 8)
-            .scaleEffect(appeared ? 1 : 0.5)
+            .shadow(color: Color.npCyan.opacity(0.4), radius: 16, x: 0, y: 6)
+            .scaleEffect(appeared ? 1 : 0.6)
             .opacity(appeared ? 1 : 0)
-            .onTapGesture {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.5)) {
-                    logoRotation += 360
-                }
-            }
 
             Text("TecStore Manager")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(.tsText)
+                .font(.system(size: 26, weight: .bold, design: .rounded))
+                .foregroundColor(.npPrimary)
                 .opacity(appeared ? 1 : 0)
 
-            TSBadge(text: "Versión 1.0.0", color: .tsIndigo)
+            NPBadge(text: "Versión 1.0.0", color: .npCyan)
+                .opacity(appeared ? 1 : 0)
         }
     }
 
-    // MARK: - Info Card
     private var infoCard: some View {
-        TSCard {
+        NPTopCard(color: .npCyan) {
             VStack(spacing: 0) {
-                cardHeader(icon: "info.circle.fill", title: "Información", color: .tsTeal)
+                cardHeader(icon: "info.circle.fill", title: "Información", color: .npCyan)
                 Divider().padding(.horizontal, 16)
                 infoRow(icon: "scope",          label: "Propósito",   value: "Gestión de tienda tecnológica")
                 Divider().padding(.horizontal, 16)
@@ -86,11 +77,10 @@ struct AcercaDeSwiftUIView: View {
         }
     }
 
-    // MARK: - Tech Stack Card
     private var techStackCard: some View {
-        TSCard {
+        NPTopCard(color: .npSecondary) {
             VStack(alignment: .leading, spacing: 14) {
-                cardHeader(icon: "hammer.fill", title: "Stack tecnológico", color: .tsBlue)
+                cardHeader(icon: "hammer.fill", title: "Stack tecnológico", color: .npSecondary)
                 Divider().padding(.horizontal, 16)
 
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
@@ -98,25 +88,25 @@ struct AcercaDeSwiftUIView: View {
                         let (icon, name, color) = techStack[i]
                         HStack(spacing: 8) {
                             ZStack {
-                                RoundedRectangle(cornerRadius: 8)
+                                RoundedRectangle(cornerRadius: 6)
                                     .fill(color.opacity(0.12))
-                                    .frame(width: 30, height: 30)
+                                    .frame(width: 28, height: 28)
                                 Image(systemName: icon)
-                                    .font(.system(size: 13, weight: .semibold))
+                                    .font(.system(size: 12, weight: .semibold))
                                     .foregroundColor(color)
                             }
                             Text(name)
                                 .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.tsText)
+                                .foregroundColor(.npPrimary)
                                 .lineLimit(1)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(10)
-                        .background(Color(hex: "#F8FAFC"))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .scaleEffect(appeared ? 1 : 0.8)
+                        .background(Color.npBg)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .scaleEffect(appeared ? 1 : 0.85)
                         .opacity(appeared ? 1 : 0)
-                        .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(Double(i) * 0.07), value: appeared)
+                        .animation(.easeOut(duration: 0.3).delay(Double(i) * 0.06), value: appeared)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -125,23 +115,22 @@ struct AcercaDeSwiftUIView: View {
         }
     }
 
-    // MARK: - Team Card
     private var teamCard: some View {
-        TSCard {
+        NPTopCard(color: .npIndigo) {
             VStack(spacing: 0) {
-                cardHeader(icon: "person.2.fill", title: "Equipo", color: .tsIndigo)
+                cardHeader(icon: "person.2.fill", title: "Equipo", color: .npIndigo)
                 Divider().padding(.horizontal, 16)
 
                 HStack(spacing: 14) {
-                    TSAvatar(name: "Juan Leon", gradient: .clientes)
+                    NPAvatar(name: "Juan Leon", gradient: .clientes)
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Juan Leon")
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.tsText)
+                            .foregroundColor(.npPrimary)
                         Text("Instructor")
                             .font(.caption)
-                            .foregroundColor(.tsSlate)
-                        TSBadge(text: "Desarrollo iOS", color: .tsIndigo)
+                            .foregroundColor(.npSlate)
+                        NPBadge(text: "Desarrollo iOS", color: .npIndigo)
                     }
                     Spacer()
                 }
@@ -157,7 +146,7 @@ struct AcercaDeSwiftUIView: View {
                 .font(.system(size: 15, weight: .semibold))
             Text(title)
                 .font(.system(size: 14, weight: .bold))
-                .foregroundColor(.tsSlate)
+                .foregroundColor(.npSlate)
                 .textCase(.uppercase)
                 .tracking(0.8)
         }
@@ -169,16 +158,16 @@ struct AcercaDeSwiftUIView: View {
     private func infoRow(icon: String, label: String, value: String) -> some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.tsTeal)
+                .foregroundColor(.npCyan)
                 .font(.system(size: 14))
                 .frame(width: 20)
             Text(label)
                 .font(.system(size: 14))
-                .foregroundColor(.tsSlate)
+                .foregroundColor(.npSlate)
             Spacer()
             Text(value)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.tsText)
+                .foregroundColor(.npPrimary)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)

@@ -10,11 +10,11 @@ struct BusquedasSwiftUIView: View {
 
     private var tabTitles = ["Productos", "Clientes", "Ventas"]
     private var tabIcons  = ["shippingbox.fill", "person.2.fill", "chart.bar.fill"]
-    private var tabGrads: [ModuleGradient] = [.productos, .clientes, .ventas]
+    private var tabGrads: [NPGradient] = [.productos, .clientes, .ventas]
 
     var body: some View {
         ZStack {
-            Color.tsBg.ignoresSafeArea()
+            Color.npBg.ignoresSafeArea()
             VStack(spacing: 0) {
                 tabSelector
                 searchField
@@ -28,7 +28,6 @@ struct BusquedasSwiftUIView: View {
         .onAppear { performSearch() }
     }
 
-    // MARK: - Tab Selector
     private var tabSelector: some View {
         HStack(spacing: 10) {
             ForEach(tabTitles.indices, id: \.self) { i in
@@ -49,9 +48,15 @@ struct BusquedasSwiftUIView: View {
                     .background(
                         tab == i
                             ? AnyView(tabGrads[i].gradient)
-                            : AnyView(tabGrads[i].start.opacity(0.1))
+                            : AnyView(tabGrads[i].start.opacity(0.08))
                     )
                     .clipShape(Capsule())
+                    .overlay(
+                        tab != i ?
+                        Capsule()
+                            .stroke(tabGrads[i].start, lineWidth: 1)
+                        : nil
+                    )
                 }
             }
             Spacer()
@@ -61,24 +66,27 @@ struct BusquedasSwiftUIView: View {
         .padding(.bottom, 8)
     }
 
-    // MARK: - Search Field
     private var searchField: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(tabGrads[tab].start)
-            TextField(placeholder, text: $search)
+                .foregroundColor(.npSlate)
+            TextField("", text: $search, prompt: Text(placeholder).foregroundColor(.npSlate))
                 .font(.system(size: 15))
+                .foregroundColor(.npPrimary)
             if !search.isEmpty {
                 Button { search = "" } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.tsSlate)
+                        .foregroundColor(.npSlate)
                 }
             }
         }
-        .padding(13)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
+        .padding(10)
+        .overlay(
+            Rectangle()
+                .fill(!search.isEmpty ? tabGrads[tab].start : Color.npBorder)
+                .frame(height: 1),
+            alignment: .bottom
+        )
         .padding(.horizontal, 18)
         .padding(.bottom, 10)
     }
@@ -91,7 +99,6 @@ struct BusquedasSwiftUIView: View {
         }
     }
 
-    // MARK: - Results
     @ViewBuilder
     private var resultsList: some View {
         ScrollView(showsIndicators: false) {
@@ -99,7 +106,7 @@ struct BusquedasSwiftUIView: View {
                 switch tab {
                 case 0:
                     if productoVM.productos.isEmpty {
-                        TSEmptyState(icon: "shippingbox", title: "Sin resultados", subtitle: "Intenta con otro término")
+                        NPEmptyState(icon: "shippingbox", title: "Sin resultados", subtitle: "Intenta con otro término")
                     } else {
                         ForEach(productoVM.productos, id: \.idProducto) { p in
                             SearchProductoRow(producto: p)
@@ -107,7 +114,7 @@ struct BusquedasSwiftUIView: View {
                     }
                 case 1:
                     if clienteVM.clientes.isEmpty {
-                        TSEmptyState(icon: "person.2", title: "Sin resultados", subtitle: "Intenta con otro término")
+                        NPEmptyState(icon: "person.2", title: "Sin resultados", subtitle: "Intenta con otro término")
                     } else {
                         ForEach(clienteVM.clientes, id: \.idCliente) { c in
                             SearchClienteRow(cliente: c)
@@ -115,7 +122,7 @@ struct BusquedasSwiftUIView: View {
                     }
                 default:
                     if ventaVM.ventas.isEmpty {
-                        TSEmptyState(icon: "cart", title: "Sin resultados", subtitle: "Intenta con otro término")
+                        NPEmptyState(icon: "cart", title: "Sin resultados", subtitle: "Intenta con otro término")
                     } else {
                         ForEach(ventaVM.ventas, id: \.idVenta) { v in
                             SearchVentaRow(venta: v)
@@ -147,15 +154,14 @@ struct BusquedasSwiftUIView: View {
     }
 }
 
-// MARK: - Result Rows
 private struct SearchProductoRow: View {
     let producto: Producto
     var body: some View {
-        TSCard {
+        NPTopCard(color: .npRose) {
             HStack(spacing: 12) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(ModuleGradient.productos.gradient)
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(NPGradient.productos.gradient)
                         .frame(width: 42, height: 42)
                     Image(systemName: "shippingbox.fill")
                         .font(.system(size: 18, weight: .semibold))
@@ -164,18 +170,18 @@ private struct SearchProductoRow: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(producto.nombre ?? "-")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.tsText)
+                        .foregroundColor(.npPrimary)
                     Text(producto.categoria ?? "-")
                         .font(.caption)
-                        .foregroundColor(.tsSlate)
+                        .foregroundColor(.npSlate)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {
                     Text(formatCurrency(producto.precio))
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.tsIndigo)
-                    TSBadge(text: "Stock \(producto.stock)",
-                            color: producto.stock <= 5 ? .tsRed : .tsEmerald)
+                        .foregroundColor(.npRose)
+                    NPBadge(text: "Stock \(producto.stock)",
+                            color: producto.stock <= 5 ? .npDanger : .npEmerald)
                 }
             }
             .padding(12)
@@ -187,25 +193,25 @@ private struct SearchClienteRow: View {
     let cliente: Cliente
     private var fullName: String { "\(cliente.nombres ?? "") \(cliente.apellidos ?? "")" }
     var body: some View {
-        TSCard {
+        NPTopCard(color: .npIndigo) {
             HStack(spacing: 12) {
-                TSAvatar(name: fullName, gradient: .clientes)
+                NPAvatar(name: fullName, gradient: .clientes)
                     .scaleEffect(0.9)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(fullName)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.tsText)
+                        .foregroundColor(.npPrimary)
                     Text("DNI: \(cliente.dni ?? "-")")
                         .font(.caption)
-                        .foregroundColor(.tsSlate)
+                        .foregroundColor(.npSlate)
                     Text(cliente.correo ?? "-")
                         .font(.system(size: 12))
-                        .foregroundColor(.tsSlate)
+                        .foregroundColor(.npSlate)
                         .lineLimit(1)
                 }
                 Spacer()
-                TSBadge(text: cliente.estado ? "Activo" : "Inactivo",
-                        color: cliente.estado ? .tsEmerald : .tsRed)
+                NPBadge(text: cliente.estado ? "Activo" : "Inactivo",
+                        color: cliente.estado ? .npEmerald : .npDanger)
             }
             .padding(12)
         }
@@ -216,25 +222,25 @@ private struct SearchVentaRow: View {
     let venta: Venta
     private var clienteName: String { "\(venta.cliente?.nombres ?? "") \(venta.cliente?.apellidos ?? "")" }
     var body: some View {
-        TSCard {
+        NPTopCard(color: .npEmerald) {
             HStack(spacing: 12) {
-                TSAvatar(name: clienteName, gradient: .ventas)
+                NPAvatar(name: clienteName, gradient: .ventas)
                     .scaleEffect(0.9)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(clienteName)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.tsText)
+                        .foregroundColor(.npPrimary)
                     Text(venta.producto?.nombre ?? "-")
                         .font(.caption)
-                        .foregroundColor(.tsSlate)
+                        .foregroundColor(.npSlate)
                     Text(formatDate(venta.fechaVenta))
                         .font(.system(size: 12))
-                        .foregroundColor(.tsSlate)
+                        .foregroundColor(.npSlate)
                 }
                 Spacer()
                 Text(formatCurrency(venta.total))
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(.tsEmerald)
+                    .foregroundColor(.npEmerald)
             }
             .padding(12)
         }

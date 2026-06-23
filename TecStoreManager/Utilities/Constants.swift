@@ -5,26 +5,26 @@ import SwiftUI
 enum AppColors {
     
     // UIKit
-    static let primary       = UIColor(hex: "#4F46E5")
-    static let primaryDark   = UIColor(hex: "#3730A3")
-    static let background    = UIColor(hex: "#F4F5FA")
+    static let primary       = UIColor(hex: "#F43F5E")
+    static let primaryDark   = UIColor(hex: "#BE123C")
+    static let background    = UIColor(hex: "#FAFAF9")
     static let surface       = UIColor(hex: "#FFFFFF")
     static let surfaceCard   = UIColor(hex: "#FFFFFF")
-    static let textPrimary   = UIColor(hex: "#1E2024")
-    static let textSecondary = UIColor(hex: "#64748B")
-    static let accent        = UIColor(hex: "#4F46E5")
-    static let success       = UIColor(hex: "#10B981")
+    static let textPrimary   = UIColor(hex: "#292524")
+    static let textSecondary = UIColor(hex: "#78716C")
+    static let accent        = UIColor(hex: "#6366F1")
+    static let success       = UIColor(hex: "#22C55E")
     static let danger        = UIColor(hex: "#EF4444")
     static let warning       = UIColor(hex: "#F59E0B")
 
     // SwiftUI
-    static let swPrimary     = Color(hex: "#4F46E5")
-    static let swBackground  = Color(hex: "#F4F5FA")
+    static let swPrimary     = Color(hex: "#F43F5E")
+    static let swBackground  = Color(hex: "#FAFAF9")
     static let swSurface     = Color(hex: "#FFFFFF")
     static let swSurfaceCard = Color(hex: "#FFFFFF")
-    static let swAccent      = Color(hex: "#4F46E5")
-    static let swTextSecond  = Color(hex: "#64748B")
-    static let swSuccess     = Color(hex: "#10B981")
+    static let swAccent      = Color(hex: "#6366F1")
+    static let swTextSecond  = Color(hex: "#78716C")
+    static let swSuccess     = Color(hex: "#22C55E")
     static let swDanger      = Color(hex: "#EF4444")
     static let swWarning     = Color(hex: "#F59E0B")
 }
@@ -55,7 +55,7 @@ extension Color {
 enum AppConstants {
     static let igvRate:        Double  = 0.18
     static let appName:        String  = "TecStore Manager"
-    static let cornerRadius:   CGFloat = 12
+    static let cornerRadius:   CGFloat = 8
     static let paddingGeneral: CGFloat = 16
 }
 
@@ -65,7 +65,7 @@ extension UIView {
     func addCard(frame: CGRect) -> UIView {
         let card = UIView(frame: frame)
         card.backgroundColor    = AppColors.surface
-        card.layer.cornerRadius = 16
+        card.layer.cornerRadius = 8
         card.layer.borderWidth  = 0.5
         card.layer.borderColor  = AppColors.primary.withAlphaComponent(0.15).cgColor
         insertSubview(card, at: 0)

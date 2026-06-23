@@ -20,7 +20,7 @@ class ProductoViewModel: ObservableObject {
     }
     
     // MARK: - Crear
-    func crear(codigo: String, nombre: String, categoria: String, precioStr: String, stockStr: String) -> Bool {
+    func crear(codigo: String, nombre: String, categoria: String, precioStr: String, stockStr: String, imagenPath: String? = nil) -> Bool {
         guard let precio = Double(precioStr),
               let stock  = Int(stockStr) else {
             errorMessage = "Precio y stock deben ser números válidos"
@@ -43,7 +43,8 @@ class ProductoViewModel: ObservableObject {
             nombre: nombre,
             categoria: categoria,
             precio: precio,
-            stock: stock
+            stock: stock,
+            imagenPath: imagenPath
         )
         cargar()
         errorMessage = ""
@@ -51,7 +52,7 @@ class ProductoViewModel: ObservableObject {
     }
     
     // MARK: - Actualizar
-    func actualizar(_ producto: Producto, codigo: String, nombre: String, categoria: String, precioStr: String, stockStr: String) -> Bool {
+    func actualizar(_ producto: Producto, codigo: String, nombre: String, categoria: String, precioStr: String, stockStr: String, imagenPath: String? = nil) -> Bool {
         guard let precio = Double(precioStr),
               let stock  = Int(stockStr) else {
             errorMessage = "Precio y stock deben ser números válidos"
@@ -75,7 +76,8 @@ class ProductoViewModel: ObservableObject {
             nombre: nombre,
             categoria: categoria,
             precio: precio,
-            stock: stock
+            stock: stock,
+            imagenPath: imagenPath
         )
         cargar()
         errorMessage = ""

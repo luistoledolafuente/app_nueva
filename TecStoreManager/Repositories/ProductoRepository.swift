@@ -9,7 +9,7 @@ class ProductoRepository {
     }
     
     // MARK: - Crear
-    func crear(codigo: String, nombre: String, categoria: String, precio: Double, stock: Int) {
+    func crear(codigo: String, nombre: String, categoria: String, precio: Double, stock: Int, imagenPath: String? = nil) {
         let producto = Producto(context: context)
         producto.idProducto    = UUID()
         producto.codigo        = codigo
@@ -19,7 +19,11 @@ class ProductoRepository {
         producto.stock         = Int32(stock)
         producto.fechaRegistro = Date()
         producto.estado        = true
+        producto.imagenPath    = imagenPath
         PersistenceController.shared.save()
+        if stock <= 5 {
+            NotificationManager.shared.scheduleLowStockAlert(productName: nombre, stock: stock, codigo: codigo)
+        }
     }
     
     // MARK: - Obtener todos
@@ -51,13 +55,17 @@ class ProductoRepository {
     }
     
     // MARK: - Actualizar
-    func actualizar(_ producto: Producto, codigo: String, nombre: String, categoria: String, precio: Double, stock: Int) {
+    func actualizar(_ producto: Producto, codigo: String, nombre: String, categoria: String, precio: Double, stock: Int, imagenPath: String? = nil) {
         producto.codigo    = codigo
         producto.nombre    = nombre
         producto.categoria = categoria
         producto.precio    = precio
         producto.stock     = Int32(stock)
+        if let img = imagenPath { producto.imagenPath = img }
         PersistenceController.shared.save()
+        if stock <= 5 {
+            NotificationManager.shared.scheduleLowStockAlert(productName: producto.nombre ?? "", stock: stock, codigo: producto.codigo ?? "")
+        }
     }
     
     // MARK: - Eliminar

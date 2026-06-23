@@ -17,6 +17,7 @@
         <attribute name="estado" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="fechaRegistro" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="idProducto" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="imagenPath" optional="YES" attributeType="String"/>
         <attribute name="nombre" optional="YES" attributeType="String"/>
         <attribute name="precio" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="stock" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
@@ -38,6 +39,7 @@
     </entity>
     <entity name="Venta" representedClassName="Venta" syncable="YES" codeGenerationType="class">
         <attribute name="cantidad" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="codigoVenta" optional="YES" attributeType="String"/>
         <attribute name="fechaVenta" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="idVenta" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="igv" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>

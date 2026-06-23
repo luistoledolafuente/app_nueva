@@ -1,6 +1,6 @@
 import SwiftUI
+import PhotosUI
 
-// MARK: - Products List
 struct ProductosSwiftUIView: View {
     @StateObject private var vm       = ProductoViewModel()
     @State private var search         = ""
@@ -27,13 +27,15 @@ struct ProductosSwiftUIView: View {
             productList
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color.tsBg.ignoresSafeArea())
+        .background(Color.npBg.ignoresSafeArea())
+        .navigationTitle("Productos")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { selected = nil; showForm = true } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 22))
-                        .foregroundColor(.tsIndigo)
+                        .foregroundColor(.npRose)
                 }
             }
         }
@@ -49,45 +51,45 @@ struct ProductosSwiftUIView: View {
         .onAppear { vm.cargar() }
     }
 
-    // MARK: - Header compacto
     private var headerBlock: some View {
-        VStack(spacing: 8) {
-            // Contador
+        VStack(spacing: 10) {
             HStack(spacing: 6) {
                 Image(systemName: "shippingbox.fill")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.tsIndigo)
+                    .foregroundColor(.npRose)
                 Text("\(vm.productos.count) productos")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.tsText)
+                    .foregroundColor(.npPrimary)
                 Spacer()
                 Text("\(displayed.count) resultados")
                     .font(.system(size: 12))
-                    .foregroundColor(.tsSlate)
+                    .foregroundColor(.npSlate)
             }
 
-            // Buscador
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.tsIndigo)
+                    .foregroundColor(.npSlate)
                     .font(.system(size: 15, weight: .medium))
-                TextField("Buscar por nombre o categoría...", text: $search)
+                TextField("", text: $search, prompt: Text("Buscar por nombre o categoría...").foregroundColor(.npSlate))
                     .font(.system(size: 15))
+                    .foregroundColor(.npPrimary)
                 if !search.isEmpty {
                     Button { search = "" } label: {
-                        Image(systemName: "xmark.circle.fill").foregroundColor(.tsSlate)
+                        Image(systemName: "xmark.circle.fill").foregroundColor(.npSlate)
                     }
                 }
             }
-            .padding(13)
-            .background(Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-            .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
+            .padding(10)
+            .overlay(
+                Rectangle()
+                    .fill(!search.isEmpty ? Color.npRose : Color.npBorder)
+                    .frame(height: 1),
+                alignment: .bottom
+            )
 
-            // Filtros
             HStack(spacing: 8) {
-                FilterChip(label: "Todos", selected: !filterLow) { filterLow = false }
-                FilterChip(label: "⚠ Stock bajo", selected: filterLow, color: .tsRed) { filterLow = true }
+                NPFilterChip(label: "Todos", selected: !filterLow, color: .npRose) { filterLow = false }
+                NPFilterChip(label: "Stock bajo", selected: filterLow, color: .npDanger) { filterLow = true }
                 Spacer()
             }
         }
@@ -96,11 +98,10 @@ struct ProductosSwiftUIView: View {
         .padding(.bottom, 10)
     }
 
-    // MARK: - List
     @ViewBuilder
     private var productList: some View {
         if displayed.isEmpty {
-            TSEmptyState(
+            NPEmptyState(
                 icon: "shippingbox",
                 title: "Sin productos",
                 subtitle: search.isEmpty ? "Agrega tu primer producto" : "No se encontraron resultados"
@@ -126,15 +127,14 @@ struct ProductosSwiftUIView: View {
     }
 }
 
-// MARK: - Product Card
 private struct ProductoCard: View {
     let producto: Producto
 
     private var stockColor: Color {
         switch producto.stock {
-        case ..<6:   return .tsRed
-        case 6..<16: return .tsAmber
-        default:     return .tsEmerald
+        case ..<6:   return .npDanger
+        case 6..<16: return .npAmber
+        default:     return .npEmerald
         }
     }
 
@@ -147,27 +147,37 @@ private struct ProductoCard: View {
     }
 
     var body: some View {
-        TSCard {
+        NPTopCard(color: .npRose) {
             HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(ModuleGradient.productos.gradient)
-                        .frame(width: 52, height: 52)
-                    Image(systemName: categoryIcon(producto.categoria ?? ""))
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(.white)
+                if let path = producto.imagenPath,
+                   let data = try? Data(contentsOf: imageURL(for: path)),
+                   let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 50, height: 50)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                } else {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(NPGradient.productos.gradient)
+                            .frame(width: 50, height: 50)
+                        Image(systemName: categoryIcon(producto.categoria ?? ""))
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundColor(.white)
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(producto.nombre ?? "-")
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.tsText)
+                        .foregroundColor(.npPrimary)
                     Text(producto.categoria ?? "-")
                         .font(.caption)
-                        .foregroundColor(.tsSlate)
+                        .foregroundColor(.npSlate)
                     Text("Código: \(producto.codigo ?? "-")")
                         .font(.system(size: 11))
-                        .foregroundColor(.tsSlate)
+                        .foregroundColor(.npSlate)
                 }
 
                 Spacer()
@@ -175,13 +185,17 @@ private struct ProductoCard: View {
                 VStack(alignment: .trailing, spacing: 6) {
                     Text(formatCurrency(producto.precio))
                         .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(.tsIndigo)
-                    TSBadge(text: "Stock \(producto.stock)", color: stockColor)
-                    TSBadge(text: stockLabel, color: stockColor.opacity(0.75))
+                        .foregroundColor(.npRose)
+                    NPBadge(text: "Stock \(producto.stock)", color: stockColor)
                 }
             }
             .padding(14)
         }
+    }
+
+    private func imageURL(for name: String) -> URL {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        return docs.appendingPathComponent(name)
     }
 
     private func categoryIcon(_ cat: String) -> String {
@@ -196,27 +210,6 @@ private struct ProductoCard: View {
     }
 }
 
-// MARK: - Filter Chip
-private struct FilterChip: View {
-    let label:    String
-    let selected: Bool
-    var color:    Color = .tsIndigo
-    let action:   () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(label)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(selected ? .white : color)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 7)
-                .background(selected ? color : color.opacity(0.1))
-                .clipShape(Capsule())
-        }
-    }
-}
-
-// MARK: - Product Form
 struct ProductoFormSwiftUIView: View {
     @Environment(\.dismiss) var dismiss
     let producto: Producto?
@@ -229,6 +222,8 @@ struct ProductoFormSwiftUIView: View {
     @State private var stock          = ""
     @State private var error          = ""
     @State private var showDeleteAlert = false
+    @State private var selectedImage: PhotosPickerItem? = nil
+    @State private var productImageData: Data? = nil
 
     private let categorias = ["Electronica", "Ropa", "Alimentos", "Hogar", "Deportes", "Otros"]
     private var isEditing: Bool { producto != nil }
@@ -236,107 +231,168 @@ struct ProductoFormSwiftUIView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.tsBg.ignoresSafeArea()
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 20) {
-                        ZStack {
-                            Circle()
-                                .fill(ModuleGradient.productos.gradient)
-                                .frame(width: 80, height: 80)
-                            Image(systemName: isEditing ? "pencil" : "plus")
-                                .font(.system(size: 34, weight: .bold))
-                                .foregroundColor(.white)
-                        }
-                        .shadow(color: Color.tsIndigo.opacity(0.4), radius: 14, x: 0, y: 6)
-                        .padding(.top, 10)
+                Color.npBg.ignoresSafeArea()
+                VStack(spacing: 0) {
+                    LinearGradient(
+                        colors: [Color.npRose, Color(hex: "#BE123C")],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(height: 6)
+                    .ignoresSafeArea()
 
-                        TSCard {
-                            VStack(spacing: 16) {
-                                sectionLabel("Identificación")
-                                TSField(icon: "barcode", placeholder: "Código", text: $codigo)
-                                TSField(icon: "tag", placeholder: "Nombre del producto", text: $nombre)
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 20) {
+                            ZStack {
+                                PolygonShape(sides: 6)
+                                    .fill(NPGradient.productos.gradient)
+                                    .frame(width: 80, height: 80)
+                                Image(systemName: isEditing ? "pencil" : "plus")
+                                    .font(.system(size: 34, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                            .shadow(color: Color.npRose.opacity(0.4), radius: 14, x: 0, y: 6)
+                            .padding(.top, 10)
 
-                                sectionLabel("Categoría")
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 8) {
-                                        ForEach(categorias, id: \.self) { cat in
-                                            Button(action: { categoria = cat }) {
-                                                Text(cat)
-                                                    .font(.system(size: 13, weight: .semibold))
-                                                    .foregroundColor(categoria == cat ? .white : .tsIndigo)
-                                                    .padding(.horizontal, 14).padding(.vertical, 7)
-                                                    .background(categoria == cat ? Color.tsIndigo : Color.tsIndigo.opacity(0.1))
-                                                    .clipShape(Capsule())
+                            NPTopCard(color: .npRose) {
+                                VStack(spacing: 18) {
+                                    Text(isEditing ? "Editar Producto" : "Nuevo Producto")
+                                        .font(.system(size: 18, weight: .bold))
+                                        .foregroundColor(.npPrimary)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                                    NPField(icon: "barcode", placeholder: "Código", text: $codigo)
+                                    NPField(icon: "tag", placeholder: "Nombre del producto", text: $nombre)
+
+                                    ScrollView(.horizontal, showsIndicators: false) {
+                                        HStack(spacing: 8) {
+                                            ForEach(categorias, id: \.self) { cat in
+                                                NPFilterChip(label: cat, selected: categoria == cat, color: .npRose) {
+                                                    categoria = cat
+                                                }
                                             }
                                         }
                                     }
-                                }
 
-                                sectionLabel("Precio y Stock")
-                                TSField(icon: "dollarsign.circle", placeholder: "Precio (S/)", text: $precio, keyboardType: .decimalPad)
-                                TSField(icon: "archivebox", placeholder: "Stock inicial", text: $stock, keyboardType: .numberPad)
+                                    NPField(icon: "dollarsign.circle", placeholder: "Precio (S/)", text: $precio, keyboardType: .decimalPad)
+                                    NPField(icon: "archivebox", placeholder: "Stock inicial", text: $stock, keyboardType: .numberPad)
 
-                                TSErrorBanner(message: error)
-
-                                Button(isEditing ? "Guardar cambios" : "Agregar producto") {
-                                    guard validate() else { return }
-                                    let ok: Bool
-                                    if let p = producto {
-                                        ok = vm.actualizar(p, codigo: codigo, nombre: nombre, categoria: categoria, precioStr: precio, stockStr: stock)
-                                    } else {
-                                        ok = vm.crear(codigo: codigo, nombre: nombre, categoria: categoria, precioStr: precio, stockStr: stock)
-                                    }
-                                    if ok { dismiss() } else { error = vm.errorMessage }
-                                }
-                                .buttonStyle(TSPrimaryButtonStyle())
-
-                                if isEditing, let p = producto {
-                                    Button {
-                                        showDeleteAlert = true
-                                    } label: {
-                                        HStack(spacing: 8) {
-                                            Image(systemName: "trash")
-                                            Text("Eliminar producto")
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Imagen del producto")
+                                            .font(.system(size: 13, weight: .semibold))
+                                            .foregroundColor(.npSlate)
+                                        HStack(spacing: 12) {
+                                            if let data = productImageData, let uiImage = UIImage(data: data) {
+                                                Image(uiImage: uiImage)
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(width: 72, height: 72)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                                                    .overlay(
+                                                        RoundedRectangle(cornerRadius: 6)
+                                                            .stroke(Color.npBorder, lineWidth: 0.5)
+                                                    )
+                                                Button {
+                                                    productImageData = nil
+                                                    selectedImage = nil
+                                                } label: {
+                                                    Image(systemName: "trash.circle.fill")
+                                                        .font(.system(size: 20))
+                                                        .foregroundColor(.npDanger)
+                                                }
+                                            } else {
+                                                PhotosPicker(selection: $selectedImage, matching: .images) {
+                                                    ZStack {
+                                                        RoundedRectangle(cornerRadius: 6)
+                                                            .stroke(Color.npBorder, lineWidth: 1)
+                                                            .frame(width: 72, height: 72)
+                                                        VStack(spacing: 4) {
+                                                            Image(systemName: "camera.fill")
+                                                                .font(.system(size: 18))
+                                                                .foregroundColor(.npSlate)
+                                                            Text("Foto")
+                                                                .font(.system(size: 9))
+                                                                .foregroundColor(.npSlate)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            Text(productImageData == nil ? "Toca para agregar una foto" : "Foto cargada")
+                                                .font(.caption)
+                                                .foregroundColor(.npSlate)
                                         }
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .foregroundColor(.tsRed)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 14)
-                                        .background(Color.tsRed.opacity(0.08))
-                                        .clipShape(RoundedRectangle(cornerRadius: 14))
                                     }
-                                    .alert("Eliminar producto", isPresented: $showDeleteAlert) {
-                                        Button("Eliminar", role: .destructive) {
-                                            vm.eliminar(p)
-                                            dismiss()
+                                    .onChange(of: selectedImage) { newItem in
+                                        Task {
+                                            if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                                                productImageData = data
+                                            }
                                         }
-                                        Button("Cancelar", role: .cancel) {}
-                                    } message: {
-                                        Text("¿Estás seguro de que deseas eliminar \"\(p.nombre ?? "")\"? Esta acción no se puede deshacer.")
+                                    }
+
+                                    NPErrorBanner(message: error)
+
+                                    Button(isEditing ? "Guardar cambios" : "Agregar producto") {
+                                        guard validate() else { return }
+                                        let ok: Bool
+                                        let imageName = saveImage()
+                                        if let p = producto {
+                                            ok = vm.actualizar(p, codigo: codigo, nombre: nombre, categoria: categoria, precioStr: precio, stockStr: stock, imagenPath: imageName)
+                                        } else {
+                                            ok = vm.crear(codigo: codigo, nombre: nombre, categoria: categoria, precioStr: precio, stockStr: stock, imagenPath: imageName)
+                                        }
+                                        if ok { dismiss() } else { error = vm.errorMessage }
+                                    }
+                                    .buttonStyle(NPWPButtonStyle(color: .npRose))
+
+                                    if isEditing, let p = producto {
+                                        Button {
+                                            showDeleteAlert = true
+                                        } label: {
+                                            HStack(spacing: 8) {
+                                                Image(systemName: "trash")
+                                                Text("Eliminar producto")
+                                            }
+                                            .font(.system(size: 15, weight: .semibold))
+                                            .foregroundColor(.npDanger)
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 14)
+                                            .background(Color.npDanger.opacity(0.06))
+                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .stroke(Color.npDanger.opacity(0.2), lineWidth: 0.5)
+                                            )
+                                        }
+                                        .alert("Eliminar producto", isPresented: $showDeleteAlert) {
+                                            Button("Eliminar", role: .destructive) {
+                                                vm.eliminar(p)
+                                                dismiss()
+                                            }
+                                            Button("Cancelar", role: .cancel) {}
+                                        } message: {
+                                            Text("¿Estás seguro de que deseas eliminar \"\(p.nombre ?? "")\"? Esta acción no se puede deshacer.")
+                                        }
                                     }
                                 }
+                                .padding(20)
                             }
-                            .padding(20)
                         }
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 30)
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, 30)
                 }
             }
-            .navigationTitle(isEditing ? "Editar Producto" : "Nuevo Producto")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancelar") { dismiss() }
+                        .foregroundColor(.npPrimary)
                 }
             }
             .onAppear(perform: loadData)
         }
-    }
-
-    private func sectionLabel(_ text: String) -> some View {
-        Text(text).font(.system(size: 13, weight: .semibold)).foregroundColor(.tsSlate)
-            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func loadData() {
@@ -346,6 +402,22 @@ struct ProductoFormSwiftUIView: View {
         categoria = p.categoria ?? "Electronica"
         precio    = String(p.precio)
         stock     = String(p.stock)
+        if let path = p.imagenPath, let data = try? Data(contentsOf: imageURL(for: path)) {
+            productImageData = data
+        }
+    }
+
+    private func saveImage() -> String? {
+        guard let data = productImageData else { return nil }
+        let name = "\(UUID().uuidString).jpg"
+        let url = imageURL(for: name)
+        try? data.write(to: url)
+        return name
+    }
+
+    private func imageURL(for name: String) -> URL {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        return docs.appendingPathComponent(name)
     }
 
     private func validate() -> Bool {
@@ -355,3 +427,5 @@ struct ProductoFormSwiftUIView: View {
         return true
     }
 }
+
+

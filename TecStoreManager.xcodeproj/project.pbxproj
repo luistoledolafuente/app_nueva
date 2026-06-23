@@ -41,6 +41,8 @@
 		5BBF10342FD9A549007E1EA6 /* VentaRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BBF10332FD9A549007E1EA6 /* VentaRepository.swift */; };
 		5BBF10452FD9B83B007E1EA6 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BBF10442FD9B83B007E1EA6 /* Constants.swift */; };
 		5BBF10472FD9B852007E1EA6 /* Validators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BBF10462FD9B852007E1EA6 /* Validators.swift */; };
+		A0D97C302FEA21B800F5CC7F /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D97C2F2FEA21B800F5CC7F /* NotificationManager.swift */; };
+		A0D97C322FEA21FE00F5CC7F /* DashboardSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D97C312FEA21FE00F5CC7F /* DashboardSwiftUIView.swift */; };
 		AA0001012FD90001007E1EA6 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001002FD90001007E1EA6 /* DesignSystem.swift */; };
 		AA0002012FD90001007E1EA6 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0002002FD90001007E1EA6 /* AppRootView.swift */; };
 		AA0003012FD90001007E1EA6 /* LoginSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0003002FD90001007E1EA6 /* LoginSwiftUIView.swift */; };
@@ -53,6 +55,8 @@
 		AA000A012FD90001007E1EA6 /* MapaSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000A002FD90001007E1EA6 /* MapaSwiftUIView.swift */; };
 		AA000B012FD90001007E1EA6 /* ConfiguracionSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000B002FD90001007E1EA6 /* ConfiguracionSwiftUIView.swift */; };
 		AA000C012FD90001007E1EA6 /* AcercaDeSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000C002FD90001007E1EA6 /* AcercaDeSwiftUIView.swift */; };
+		CDF487722FE9E9AE00BB622C /* FirebaseAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDF4876F2FE9E9AD00BB622C /* FirebaseAuthService.swift */; };
+		CDF487732FE9E9AE00BB622C /* ReniecService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDF487702FE9E9AD00BB622C /* ReniecService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -92,6 +96,8 @@
 		5BBF10332FD9A549007E1EA6 /* VentaRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VentaRepository.swift; sourceTree = "<group>"; };
 		5BBF10442FD9B83B007E1EA6 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		5BBF10462FD9B852007E1EA6 /* Validators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Validators.swift; sourceTree = "<group>"; };
+		A0D97C2F2FEA21B800F5CC7F /* NotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		A0D97C312FEA21FE00F5CC7F /* DashboardSwiftUIView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashboardSwiftUIView.swift; sourceTree = "<group>"; };
 		AA0001002FD90001007E1EA6 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		AA0002002FD90001007E1EA6 /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
 		AA0003002FD90001007E1EA6 /* LoginSwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginSwiftUIView.swift; sourceTree = "<group>"; };
@@ -104,6 +110,8 @@
 		AA000A002FD90001007E1EA6 /* MapaSwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapaSwiftUIView.swift; sourceTree = "<group>"; };
 		AA000B002FD90001007E1EA6 /* ConfiguracionSwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfiguracionSwiftUIView.swift; sourceTree = "<group>"; };
 		AA000C002FD90001007E1EA6 /* AcercaDeSwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcercaDeSwiftUIView.swift; sourceTree = "<group>"; };
+		CDF4876F2FE9E9AD00BB622C /* FirebaseAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseAuthService.swift; sourceTree = "<group>"; };
+		CDF487702FE9E9AD00BB622C /* ReniecService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReniecService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -191,6 +199,7 @@
 		5BBF102E2FD9A4D5007E1EA6 /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
+				CDF487712FE9E9AD00BB622C /* Services */,
 				5BBF102F2FD9A532007E1EA6 /* ProductoRepository.swift */,
 				5BBF10312FD9A53C007E1EA6 /* ClienteRepository.swift */,
 				5BBF10332FD9A549007E1EA6 /* VentaRepository.swift */,
@@ -231,43 +240,6 @@
 				AA00F0042FD90001007E1EA6 /* Main */,
 			);
 			path = SwiftUI;
-			sourceTree = "<group>";
-		};
-		AA00F0012FD90001007E1EA6 /* Core */ = {
-			isa = PBXGroup;
-			children = (
-				AA0001002FD90001007E1EA6 /* DesignSystem.swift */,
-				AA0002002FD90001007E1EA6 /* AppRootView.swift */,
-			);
-			path = Core;
-			sourceTree = "<group>";
-		};
-		AA00F0022FD90001007E1EA6 /* Auth */ = {
-			isa = PBXGroup;
-			children = (
-				AA0003002FD90001007E1EA6 /* LoginSwiftUIView.swift */,
-			);
-			path = Auth;
-			sourceTree = "<group>";
-		};
-		AA00F0032FD90001007E1EA6 /* Menu */ = {
-			isa = PBXGroup;
-			children = (
-				AA0004002FD90001007E1EA6 /* MenuSwiftUIView.swift */,
-			);
-			path = Menu;
-			sourceTree = "<group>";
-		};
-		AA00F0042FD90001007E1EA6 /* Main */ = {
-			isa = PBXGroup;
-			children = (
-				AA0008002FD90001007E1EA6 /* ReportesSwiftUIView.swift */,
-				AA0009002FD90001007E1EA6 /* BusquedasSwiftUIView.swift */,
-				AA000A002FD90001007E1EA6 /* MapaSwiftUIView.swift */,
-				AA000B002FD90001007E1EA6 /* ConfiguracionSwiftUIView.swift */,
-				AA000C002FD90001007E1EA6 /* AcercaDeSwiftUIView.swift */,
-			);
-			path = Main;
 			sourceTree = "<group>";
 		};
 		5BBF10382FD9A5A6007E1EA6 /* Auth */ = {
@@ -357,10 +329,58 @@
 		5BBF10432FD9B82A007E1EA6 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				A0D97C2F2FEA21B800F5CC7F /* NotificationManager.swift */,
 				5BBF10442FD9B83B007E1EA6 /* Constants.swift */,
 				5BBF10462FD9B852007E1EA6 /* Validators.swift */,
 			);
 			path = Utilities;
+			sourceTree = "<group>";
+		};
+		AA00F0012FD90001007E1EA6 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				AA0001002FD90001007E1EA6 /* DesignSystem.swift */,
+				AA0002002FD90001007E1EA6 /* AppRootView.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		AA00F0022FD90001007E1EA6 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				AA0003002FD90001007E1EA6 /* LoginSwiftUIView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		AA00F0032FD90001007E1EA6 /* Menu */ = {
+			isa = PBXGroup;
+			children = (
+				AA0004002FD90001007E1EA6 /* MenuSwiftUIView.swift */,
+			);
+			path = Menu;
+			sourceTree = "<group>";
+		};
+		AA00F0042FD90001007E1EA6 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				A0D97C312FEA21FE00F5CC7F /* DashboardSwiftUIView.swift */,
+				AA0008002FD90001007E1EA6 /* ReportesSwiftUIView.swift */,
+				AA0009002FD90001007E1EA6 /* BusquedasSwiftUIView.swift */,
+				AA000A002FD90001007E1EA6 /* MapaSwiftUIView.swift */,
+				AA000B002FD90001007E1EA6 /* ConfiguracionSwiftUIView.swift */,
+				AA000C002FD90001007E1EA6 /* AcercaDeSwiftUIView.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		CDF487712FE9E9AD00BB622C /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				CDF4876F2FE9E9AD00BB622C /* FirebaseAuthService.swift */,
+				CDF487702FE9E9AD00BB622C /* ReniecService.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -407,6 +427,10 @@
 				Base,
 			);
 			mainGroup = 5BBF0FFB2FD9A3FC007E1EA6;
+			packageReferences = (
+				CDF487742FE9EBD600BB622C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				A0D97C332FEA22BE00F5CC7F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			productRefGroup = 5BBF10052FD9A3FC007E1EA6 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -454,7 +478,11 @@
 				5B7F9ED82FDDEED70007DBC5 /* ConfiguracionViewController.swift in Sources */,
 				5B7F9EDC2FDE11A90007DBC5 /* ProductoFormViewController.swift in Sources */,
 				5BBF100A2FD9A3FC007E1EA6 /* SceneDelegate.swift in Sources */,
+				A0D97C322FEA21FE00F5CC7F /* DashboardSwiftUIView.swift in Sources */,
 				5B7F9EE02FDE1D8F0007DBC5 /* ClienteFormViewController.swift in Sources */,
+				CDF487722FE9E9AE00BB622C /* FirebaseAuthService.swift in Sources */,
+				A0D97C302FEA21B800F5CC7F /* NotificationManager.swift in Sources */,
+				CDF487732FE9E9AE00BB622C /* ReniecService.swift in Sources */,
 				5BBF102B2FD9A4BD007E1EA6 /* VentaViewModel.swift in Sources */,
 				5BB141152FDDDE4700F75630 /* LoginViewController.swift in Sources */,
 				5B7F9EE42FDE2CBD0007DBC5 /* VentaFormViewController.swift in Sources */,
@@ -630,6 +658,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TecStoreManager/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "TecStoreManager necesita acceder a tu ubicación para registrar y mostrar puntos de referencia en el mapa.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -640,7 +669,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rodrigo.tecstore.TecStoreManager;
+				PRODUCT_BUNDLE_IDENTIFIER = com.toledo.tecstore.TecStoreManager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -657,6 +686,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TecStoreManager/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "TecStoreManager necesita acceder a tu ubicación para registrar y mostrar puntos de referencia en el mapa.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -667,7 +697,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rodrigo.tecstore.TecStoreManager;
+				PRODUCT_BUNDLE_IDENTIFIER = com.toledo.tecstore.TecStoreManager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -697,6 +727,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A0D97C332FEA22BE00F5CC7F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.2.0;
+			};
+		};
+		CDF487742FE9EBD600BB622C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.15.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCVersionGroup section */
 		5BBF10102FD9A3FC007E1EA6 /* TecStoreManager.xcdatamodeld */ = {

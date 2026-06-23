@@ -6,7 +6,7 @@ struct AppRootView: View {
     var body: some View {
         Group {
             if authVM.estaLogueado {
-                MenuSwiftUIView()
+                DashboardSwiftUIView()
                     .environmentObject(authVM)
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing),

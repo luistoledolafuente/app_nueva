@@ -1,29 +1,28 @@
 import SwiftUI
 
-private struct MenuItem: Identifiable {
-    let id         = UUID()
-    let title:     String
-    let subtitle:  String
-    let icon:      String
-    let gradient:  ModuleGradient
+struct MenuItem: Identifiable {
+    let id = UUID()
+    let title: String
+    let subtitle: String
+    let icon: String
+    let gradient: NPGradient
     let destination: AnyView
 }
 
 struct MenuSwiftUIView: View {
-    @EnvironmentObject var authVM:  AuthViewModel
-    @State private var showLogout  = false
-    @State private var appeared    = false
+    @EnvironmentObject var authVM: AuthViewModel
+    @State private var showLogout = false
 
     private var items: [MenuItem] {
         [
-            MenuItem(title: "Productos",      subtitle: "Inventario",    icon: "shippingbox.fill",      gradient: .productos,     destination: AnyView(ProductosSwiftUIView())),
-            MenuItem(title: "Clientes",       subtitle: "Base de datos", icon: "person.2.fill",         gradient: .clientes,      destination: AnyView(ClientesSwiftUIView())),
-            MenuItem(title: "Ventas",         subtitle: "Transacciones", icon: "chart.bar.fill",        gradient: .ventas,        destination: AnyView(VentasSwiftUIView())),
-            MenuItem(title: "Búsquedas",      subtitle: "Encontrar",     icon: "magnifyingglass.circle.fill", gradient: .busquedas, destination: AnyView(BusquedasSwiftUIView())),
-            MenuItem(title: "Mapa",           subtitle: "Ubicaciones",   icon: "map.fill",              gradient: .mapa,          destination: AnyView(MapaSwiftUIView())),
-            MenuItem(title: "Reportes",       subtitle: "Estadísticas",  icon: "chart.pie.fill",        gradient: .reportes,      destination: AnyView(ReportesSwiftUIView())),
-            MenuItem(title: "Configuración",  subtitle: "Ajustes",       icon: "gearshape.2.fill",      gradient: .configuracion, destination: AnyView(ConfiguracionSwiftUIView())),
-            MenuItem(title: "Acerca de",      subtitle: "Información",   icon: "info.circle.fill",      gradient: .acercaDe,      destination: AnyView(AcercaDeSwiftUIView())),
+            MenuItem(title: "Productos",      subtitle: "Inventario",    icon: "shippingbox.fill",           gradient: .productos,     destination: AnyView(ProductosSwiftUIView())),
+            MenuItem(title: "Clientes",       subtitle: "Base de datos", icon: "person.2.fill",              gradient: .clientes,      destination: AnyView(ClientesSwiftUIView())),
+            MenuItem(title: "Ventas",         subtitle: "Transacciones", icon: "chart.bar.fill",             gradient: .ventas,        destination: AnyView(VentasSwiftUIView())),
+            MenuItem(title: "Búsquedas",      subtitle: "Encontrar",     icon: "magnifyingglass.circle.fill", gradient: .busquedas,     destination: AnyView(BusquedasSwiftUIView())),
+            MenuItem(title: "Mapa",           subtitle: "Ubicaciones",   icon: "map.fill",                   gradient: .mapa,          destination: AnyView(MapaSwiftUIView())),
+            MenuItem(title: "Reportes",       subtitle: "Estadísticas",  icon: "chart.pie.fill",             gradient: .reportes,      destination: AnyView(ReportesSwiftUIView())),
+            MenuItem(title: "Configuración",  subtitle: "Ajustes",       icon: "gearshape.2.fill",           gradient: .configuracion, destination: AnyView(ConfiguracionSwiftUIView())),
+            MenuItem(title: "Acerca de",      subtitle: "Información",   icon: "info.circle.fill",           gradient: .acercaDe,      destination: AnyView(AcercaDeSwiftUIView())),
         ]
     }
 
@@ -33,22 +32,21 @@ struct MenuSwiftUIView: View {
     ]
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.tsBg.ignoresSafeArea()
+        ZStack {
+            Color.npBg.ignoresSafeArea()
 
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
-                        headerSection
-                        modulesGrid
-                        Spacer(minLength: 20)
-                    }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 10)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 22) {
+                    headerSection
+                    modulesGrid
+                    Spacer(minLength: 20)
                 }
+                .padding(.horizontal, 18)
+                .padding(.top, 10)
             }
-            .navigationBarHidden(true)
         }
+        .navigationTitle("Menú completo")
+        .navigationBarTitleDisplayMode(.inline)
         .alert("Cerrar sesión", isPresented: $showLogout) {
             Button("Cerrar sesión", role: .destructive) {
                 withAnimation { authVM.logout() }
@@ -59,98 +57,96 @@ struct MenuSwiftUIView: View {
         }
     }
 
-    // MARK: - Header
     private var headerSection: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Bienvenido 👋")
-                    .font(.system(size: 14))
-                    .foregroundColor(.tsSlate)
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(NPGradient.dashboard.gradient)
+                    .frame(width: 52, height: 52)
+                Text(initials)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.white)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
                 Text(authVM.usuarioActual?.nombreCompleto ?? "Usuario")
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
-                    .foregroundColor(.tsText)
-                    .lineLimit(1)
-                Text("TecStore Manager")
-                    .font(.caption)
-                    .foregroundColor(.tsSlate)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.npPrimary)
+                MPBadge(text: "Admin", color: .npSecondary)
             }
             Spacer()
+
             Button {
                 showLogout = true
             } label: {
-                ZStack {
-                    Circle()
-                        .fill(Color.tsRed.opacity(0.1))
-                        .frame(width: 44, height: 44)
+                HStack(spacing: 4) {
                     Image(systemName: "rectangle.portrait.and.arrow.right")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.tsRed)
+                        .font(.system(size: 13, weight: .semibold))
+                    Text("Salir")
+                        .font(.system(size: 13, weight: .semibold))
                 }
+                .foregroundColor(.npAccent)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.npAccent, lineWidth: 1)
+                )
             }
         }
-        .padding(.top, 18)
+        .padding(.top, 16)
     }
 
-    // MARK: - Grid
     private var modulesGrid: some View {
         LazyVGrid(columns: columns, spacing: 14) {
-            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+            ForEach(items, id: \.id) { item in
                 NavigationLink(destination: item.destination) {
-                    MenuCard(item: item, delay: Double(index) * 0.06)
+                    MenuCard(item: item)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
         }
     }
+
+    private var initials: String {
+        let name = authVM.usuarioActual?.nombreCompleto ?? "U"
+        let parts = name.split(separator: " ")
+        let chars = parts.prefix(2).compactMap { $0.first.map { String($0) } }
+        return chars.joined().uppercased()
+    }
 }
 
-// MARK: - Menu Card
+// MARK: - Menu Card (sin DragGesture)
 private struct MenuCard: View {
-    let item:  MenuItem
-    let delay: Double
-
-    @State private var appeared  = false
-    @State private var isPressed = false
+    let item: MenuItem
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            // Icon badge
+        VStack(alignment: .leading, spacing: 12) {
             ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white.opacity(0.22))
-                    .frame(width: 58, height: 58)
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(item.gradient.gradient)
+                    .frame(width: 52, height: 52)
                 Image(systemName: item.icon)
-                    .font(.system(size: 28, weight: .semibold))
+                    .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(.white)
             }
+            .shadow(color: item.gradient.start.opacity(0.3), radius: 6, x: 0, y: 3)
 
             Spacer()
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.title)
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.npPrimary)
                 Text(item.subtitle)
                     .font(.system(size: 12))
-                    .foregroundColor(Color.white.opacity(0.75))
+                    .foregroundColor(.npMuted)
             }
         }
-        .padding(18)
-        .frame(maxWidth: .infinity, minHeight: 150, alignment: .topLeading)
-        .background(item.gradient.gradient)
-        .clipShape(RoundedRectangle(cornerRadius: 22))
-        .shadow(color: item.gradient.start.opacity(0.35), radius: 12, x: 0, y: 6)
-        .scaleEffect(appeared ? (isPressed ? 0.95 : 1.0) : 0.85)
-        .opacity(appeared ? 1 : 0)
-        .onAppear {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.72).delay(delay)) {
-                appeared = true
-            }
-        }
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in withAnimation(.easeInOut(duration: 0.12)) { isPressed = true } }
-                .onEnded   { _ in withAnimation(.spring(response: 0.3))    { isPressed = false } }
-        )
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 140, alignment: .topLeading)
+        .background(Color.npCard)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
     }
 }

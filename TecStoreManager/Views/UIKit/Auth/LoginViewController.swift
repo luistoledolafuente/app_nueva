@@ -2,9 +2,10 @@ import UIKit
 
 class LoginViewController: UIViewController {
 
-    // MARK: - IBOutlets (storyboard — no tocar)
+    // MARK: - IBOutlets (storyboard — no tocar, mantener nombres)
     @IBOutlet weak var usuarioField:   UITextField!
     @IBOutlet weak var passwordField:  UITextField!
+    var emailField: UITextField { usuarioField }
     @IBOutlet weak var errorLabel:     UILabel!
     @IBOutlet weak var loginButton:    UIButton!
     @IBOutlet weak var registerButton: UIButton!
@@ -42,49 +43,42 @@ class LoginViewController: UIViewController {
         let w = view.bounds.width
         let h = view.bounds.height
 
-        // Fondo gradiente
         gradientLayer.frame = view.bounds
 
-        // Círculos decorativos
         circleTop.frame    = CGRect(x: w - 110, y: -90, width: 260, height: 260)
         circleBottom.frame = CGRect(x: -90, y: h - 160, width: 240, height: 240)
         circleTop.layer.cornerRadius    = 130
         circleBottom.layer.cornerRadius = 120
 
-        // Card: desde arriba de los campos hasta abajo del botón register
         let hPad: CGFloat   = 18
-        let cardTop: CGFloat = usuarioField.frame.minY - 76   // espacio para titulo
+        let cardTop: CGFloat = emailField.frame.minY - 76
         let cardBot: CGFloat = registerButton.frame.maxY + 22
         cardView.frame  = CGRect(x: hPad, y: cardTop,
                                  width: w - hPad * 2,
                                  height: cardBot - cardTop)
         cardView.layer.cornerRadius = 26
 
-        // Título y subtítulo dentro del card
         cardTitleLabel.frame    = CGRect(x: hPad + 20, y: cardTop + 22,
                                          width: w - (hPad + 20) * 2, height: 28)
         cardSubtitleLabel.frame = CGRect(x: hPad + 20, y: cardTop + 52,
                                          width: w - (hPad + 20) * 2, height: 18)
 
-        // Logo encima del card
         let logoSize: CGFloat = 88
         let logoY = max(cardTop - logoSize - 22, view.safeAreaInsets.top + 14)
         logoContainer.frame          = CGRect(x: (w - logoSize) / 2, y: logoY,
                                               width: logoSize, height: logoSize)
         logoContainer.layer.cornerRadius = logoSize / 2
 
-        // Botón con gradiente
         btnGradientLayer.frame        = loginButton.bounds
         btnGradientLayer.cornerRadius = loginButton.layer.cornerRadius
 
-        // Iconos en los campos (necesitan el frame final)
-        attachIcon("person.fill",  to: usuarioField)
+        attachIcon("envelope.fill", to: emailField)
         attachIcon("lock.fill",    to: passwordField)
     }
 
     // MARK: - Ocultar elementos del storyboard sin outlet
     private func hideStoryboardDecorations() {
-        let outlets: [UIView?] = [usuarioField, passwordField,
+        let outlets: [UIView?] = [emailField, passwordField,
                                    errorLabel, loginButton, registerButton]
         let keep = Set(outlets.compactMap { $0 })
         view.subviews.forEach { if !keep.contains($0) { $0.isHidden = true } }
@@ -93,9 +87,9 @@ class LoginViewController: UIViewController {
     // MARK: - Fondo gradiente
     private func buildBackground() {
         gradientLayer.colors = [
-            UIColor(hex: "#3730A3").cgColor,
-            UIColor(hex: "#4F46E5").cgColor,
-            UIColor(hex: "#7C3AED").cgColor
+            UIColor(hex: "#0F766E").cgColor,
+            UIColor(hex: "#0D9488").cgColor,
+            UIColor(hex: "#0891B2").cgColor
         ]
         gradientLayer.locations   = [0, 0.5, 1]
         gradientLayer.startPoint  = CGPoint(x: 0, y: 0)
@@ -120,14 +114,12 @@ class LoginViewController: UIViewController {
         logoContainer.layer.shadowRadius  = 20
         logoContainer.layer.shadowOffset  = CGSize(width: 0, height: 8)
 
-        // Círculo interior
         let inner = UIView()
         inner.backgroundColor    = UIColor.white.withAlphaComponent(0.14)
         inner.layer.cornerRadius = 32
         inner.translatesAutoresizingMaskIntoConstraints = false
         logoContainer.addSubview(inner)
 
-        // Ícono SF Symbol
         let config = UIImage.SymbolConfiguration(pointSize: 34, weight: .bold)
         let imgView = UIImageView(image: UIImage(systemName: "cart.fill.badge.plus",
                                                   withConfiguration: config))
@@ -157,39 +149,40 @@ class LoginViewController: UIViewController {
         cardView.layer.shadowOpacity = 0.16
         cardView.layer.shadowRadius  = 28
         cardView.layer.shadowOffset  = CGSize(width: 0, height: 12)
-        view.insertSubview(cardView, belowSubview: usuarioField)
+        view.insertSubview(cardView, belowSubview: emailField)
     }
 
     // MARK: - Título y subtítulo del card
     private func buildCardLabels() {
         cardTitleLabel.text      = "Iniciar sesión"
         cardTitleLabel.font      = .systemFont(ofSize: 22, weight: .bold)
-        cardTitleLabel.textColor = UIColor(hex: "#1E2024")
+        cardTitleLabel.textColor = .black
         view.addSubview(cardTitleLabel)
 
         cardSubtitleLabel.text      = "Bienvenido de vuelta"
         cardSubtitleLabel.font      = .systemFont(ofSize: 13)
-        cardSubtitleLabel.textColor = UIColor(hex: "#64748B")
+        cardSubtitleLabel.textColor = UIColor(hex: "#475569")
         view.addSubview(cardSubtitleLabel)
     }
 
     // MARK: - Estilo de campos
     private func styleFields() {
-        for field in [usuarioField, passwordField] {
+        for field in [emailField, passwordField] {
             guard let f = field else { continue }
-            f.textColor           = UIColor(hex: "#1E2024")
-            f.backgroundColor     = UIColor(hex: "#F8FAFC")
+            f.textColor           = UIColor(hex: "#0F172A")
+            f.backgroundColor     = UIColor(hex: "#F0FDF4")
             f.font                = .systemFont(ofSize: 15)
             f.layer.cornerRadius  = 13
             f.layer.borderWidth   = 1
-            f.layer.borderColor   = UIColor(hex: "#4F46E5").withAlphaComponent(0.18).cgColor
+            f.layer.borderColor   = UIColor(hex: "#0D9488").withAlphaComponent(0.18).cgColor
             f.layer.masksToBounds = true
         }
-        usuarioField.isSecureTextEntry  = false
+        emailField.isSecureTextEntry  = false
         passwordField.isSecureTextEntry = true
 
-        usuarioField.attributedPlaceholder = placeholder("Usuario")
+        emailField.attributedPlaceholder = placeholder("Correo electrónico")
         passwordField.attributedPlaceholder = placeholder("Contraseña")
+        emailField.keyboardType = .emailAddress
     }
 
     private func attachIcon(_ systemName: String, to field: UITextField) {
@@ -197,7 +190,7 @@ class LoginViewController: UIViewController {
         let config    = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
         let img       = UIImageView(image: UIImage(systemName: systemName,
                                                     withConfiguration: config))
-        img.tintColor   = UIColor(hex: "#64748B")
+        img.tintColor   = UIColor(hex: "#475569")
         img.contentMode = .scaleAspectFit
         let iconH: CGFloat = 18
         img.frame = CGRect(x: 13, y: (container.frame.height - iconH) / 2,
@@ -209,7 +202,7 @@ class LoginViewController: UIViewController {
 
     private func placeholder(_ text: String) -> NSAttributedString {
         NSAttributedString(string: text,
-                           attributes: [.foregroundColor: UIColor(hex: "#64748B")])
+                           attributes: [.foregroundColor: UIColor(hex: "#475569")])
     }
 
     // MARK: - Botón login
@@ -220,13 +213,13 @@ class LoginViewController: UIViewController {
         loginButton.layer.cornerRadius = 14
         loginButton.layer.masksToBounds = false
 
-        btnGradientLayer.colors     = [UIColor(hex: "#4F46E5").cgColor,
-                                        UIColor(hex: "#7C3AED").cgColor]
+        btnGradientLayer.colors     = [UIColor(hex: "#0D9488").cgColor,
+                                        UIColor(hex: "#0F766E").cgColor]
         btnGradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
         btnGradientLayer.endPoint   = CGPoint(x: 1, y: 0.5)
         loginButton.layer.insertSublayer(btnGradientLayer, at: 0)
 
-        loginButton.layer.shadowColor   = UIColor(hex: "#4F46E5").cgColor
+        loginButton.layer.shadowColor   = UIColor(hex: "#0D9488").cgColor
         loginButton.layer.shadowOpacity = 0.45
         loginButton.layer.shadowRadius  = 14
         loginButton.layer.shadowOffset  = CGSize(width: 0, height: 6)
@@ -236,12 +229,12 @@ class LoginViewController: UIViewController {
     private func styleRegisterButton() {
         let attr = NSMutableAttributedString(
             string: "¿No tienes cuenta? ",
-            attributes: [.foregroundColor: UIColor(hex: "#64748B"),
+            attributes: [.foregroundColor: UIColor(hex: "#475569"),
                          .font: UIFont.systemFont(ofSize: 14)]
         )
         attr.append(NSAttributedString(
             string: "Regístrate",
-            attributes: [.foregroundColor: UIColor(hex: "#4F46E5"),
+            attributes: [.foregroundColor: UIColor(hex: "#0D9488"),
                          .font: UIFont.systemFont(ofSize: 14, weight: .bold)]
         ))
         registerButton.setAttributedTitle(attr, for: .normal)
@@ -260,13 +253,20 @@ class LoginViewController: UIViewController {
     // MARK: - Actions
     @IBAction func loginTapped(_ sender: UIButton) {
         animateButtonPress(sender)
-        let user = usuarioField.text  ?? ""
-        let pass = passwordField.text ?? ""
-        if authViewModel.login(nombreUsuario: user, password: pass) {
-            performSegue(withIdentifier: "goToMenu", sender: nil)
-        } else {
-            errorLabel.text = authViewModel.errorMessage
-            shakeView(errorLabel)
+        let email = emailField.text  ?? ""
+        let pass  = passwordField.text ?? ""
+        loginButton.isEnabled = false
+        loginButton.setTitle("Ingresando...", for: .normal)
+        Task {
+            await authViewModel.login(email: email, password: pass)
+            if authViewModel.estaLogueado {
+                performSegue(withIdentifier: "goToMenu", sender: nil)
+            } else {
+                errorLabel.text = authViewModel.errorMessage
+                shakeView(errorLabel)
+                loginButton.isEnabled = true
+                loginButton.setTitle("Ingresar", for: .normal)
+            }
         }
     }
 
