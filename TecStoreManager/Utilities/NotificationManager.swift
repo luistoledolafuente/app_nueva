@@ -19,7 +19,7 @@ class NotificationManager {
     }
 
     func scheduleLowStockAlert(productName: String, stock: Int, codigo: String) {
-        let stockAlertsEnabled = UserDefaults.standard.bool(forKey: "stockAlerts")
+        let stockAlertsEnabled = UserDefaults.standard.object(forKey: "stockAlerts") as? Bool ?? true
         guard stockAlertsEnabled else { return }
 
         let content = UNMutableNotificationContent()
@@ -36,7 +36,7 @@ class NotificationManager {
     }
 
     func scheduleDailyStockCheck() {
-        let remindersEnabled = UserDefaults.standard.bool(forKey: "reminders")
+        let remindersEnabled = UserDefaults.standard.object(forKey: "reminders") as? Bool ?? false
         guard remindersEnabled else { return }
 
         let content = UNMutableNotificationContent()

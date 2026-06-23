@@ -13,6 +13,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #if canImport(FirebaseCore)
         FirebaseApp.configure()
         #endif
+        
+        UserDefaults.standard.register(defaults: [
+            "stockAlerts": true,
+            "reminders": false,
+            "darkMode": false
+        ])
+        
         NotificationManager.shared.requestPermission()
         return true
     }

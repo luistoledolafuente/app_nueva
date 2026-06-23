@@ -1,19 +1,34 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Paleta Market
 extension Color {
-    static let npPrimary   = Color(hex: "#0F172A")
+    static let npPrimary   = Color(UIColor { trait in
+        trait.userInterfaceStyle == .dark ? UIColor(hex: "#F8FAFC") : UIColor(hex: "#0F172A")
+    })
     static let npAccent    = Color(hex: "#F59E0B")
     static let npSecondary = Color(hex: "#059669")
     static let npSuccess   = Color(hex: "#10B981")
     static let npDanger    = Color(hex: "#EF4444")
     static let npWarning   = Color(hex: "#F59E0B")
-    static let npBg        = Color(hex: "#F1F5F9")
-    static let npCard      = Color.white
-    static let npBorder    = Color(hex: "#E2E8F0")
-    static let npText      = Color(hex: "#0F172A")
-    static let npMuted     = Color(hex: "#64748B")
-    static let npSlate     = Color(hex: "#64748B")
+    static let npBg        = Color(UIColor { trait in
+        trait.userInterfaceStyle == .dark ? UIColor(hex: "#0F172A") : UIColor(hex: "#F1F5F9")
+    })
+    static let npCard      = Color(UIColor { trait in
+        trait.userInterfaceStyle == .dark ? UIColor(hex: "#1E293B") : UIColor(hex: "#FFFFFF")
+    })
+    static let npBorder    = Color(UIColor { trait in
+        trait.userInterfaceStyle == .dark ? UIColor(hex: "#334155") : UIColor(hex: "#E2E8F0")
+    })
+    static let npText      = Color(UIColor { trait in
+        trait.userInterfaceStyle == .dark ? UIColor(hex: "#F8FAFC") : UIColor(hex: "#0F172A")
+    })
+    static let npMuted     = Color(UIColor { trait in
+        trait.userInterfaceStyle == .dark ? UIColor(hex: "#94A3B8") : UIColor(hex: "#64748B")
+    })
+    static let npSlate     = Color(UIColor { trait in
+        trait.userInterfaceStyle == .dark ? UIColor(hex: "#94A3B8") : UIColor(hex: "#64748B")
+    })
 
     static let npRose      = Color(hex: "#F43F5E")
     static let npIndigo    = Color(hex: "#6366F1")

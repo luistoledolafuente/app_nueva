@@ -40,6 +40,14 @@ class VentaRepository {
         producto.stock -= Int32(cantidad)
         
         PersistenceController.shared.save()
+        
+        if producto.stock <= 5 {
+            NotificationManager.shared.scheduleLowStockAlert(
+                productName: producto.nombre ?? "",
+                stock: Int(producto.stock),
+                codigo: producto.codigo ?? ""
+            )
+        }
     }
     
     // MARK: - Obtener todas

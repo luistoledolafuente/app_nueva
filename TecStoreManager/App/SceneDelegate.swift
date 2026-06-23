@@ -12,7 +12,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let rootView = AppRootView()
         window.rootViewController = UIHostingController(rootView: rootView)
         self.window = window
-        window.overrideUserInterfaceStyle = .light
+        
+        let darkMode = UserDefaults.standard.bool(forKey: "darkMode")
+        window.overrideUserInterfaceStyle = darkMode ? .dark : .light
+        
         window.tintColor = AppColors.accent
         window.makeKeyAndVisible()
     }

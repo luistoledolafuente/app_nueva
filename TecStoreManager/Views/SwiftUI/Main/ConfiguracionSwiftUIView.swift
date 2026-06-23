@@ -2,18 +2,8 @@ import SwiftUI
 
 struct ConfiguracionSwiftUIView: View {
     @AppStorage("darkMode")   private var darkMode    = false
-    @AppStorage("stockAlerts") private var stockAlerts = true {
-        didSet { if stockAlerts { NotificationManager.shared.scheduleDailyStockCheck() } }
-    }
-    @AppStorage("reminders")  private var reminders   = false {
-        didSet {
-            if reminders {
-                NotificationManager.shared.scheduleDailyStockCheck()
-            } else {
-                NotificationManager.shared.cancelAll()
-            }
-        }
-    }
+    @AppStorage("stockAlerts") private var stockAlerts = true
+    @AppStorage("reminders")  private var reminders   = false
 
     var body: some View {
         ZStack {
@@ -33,6 +23,18 @@ struct ConfiguracionSwiftUIView: View {
         }
         .navigationTitle("Configuración")
         .navigationBarTitleDisplayMode(.large)
+        .onChange(of: stockAlerts) { newValue in
+            if newValue {
+                NotificationManager.shared.scheduleDailyStockCheck()
+            }
+        }
+        .onChange(of: reminders) { newValue in
+            if newValue {
+                NotificationManager.shared.scheduleDailyStockCheck()
+            } else {
+                NotificationManager.shared.cancelAll()
+            }
+        }
     }
 
     private var profileHeader: some View {
