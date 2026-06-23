@@ -195,27 +195,27 @@ struct VentaFormSwiftUIView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#F5F5F0").ignoresSafeArea()
+                Color.npBg.ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     // Header
                     HStack {
                         Button("Cancelar") { dismiss() }
-                            .foregroundColor(Color(hex: "#F43F5E"))
+                            .foregroundColor(.npDanger)
                             .font(.system(size: 15, weight: .semibold))
                         Spacer()
                         Text("Nueva Venta")
                             .font(.system(size: 17, weight: .bold))
-                            .foregroundColor(Color(hex: "#292524"))
+                            .foregroundColor(.npPrimary)
                         Spacer()
                         Button("Hecho") { registrar() }
                             .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(itemsCarrito.isEmpty ? Color(hex: "#78716C") : Color(hex: "#059669"))
+                            .foregroundColor(itemsCarrito.isEmpty ? .npSlate : .npSecondary)
                             .disabled(itemsCarrito.isEmpty)
                     }
                     .padding(.horizontal, 18)
                     .padding(.vertical, 12)
-                    .background(Color.white)
+                    .background(Color.npCard)
 
                     ScrollView {
                         VStack(spacing: 0) {
@@ -223,14 +223,14 @@ struct VentaFormSwiftUIView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("CLIENTE".uppercased())
                                     .font(.system(size: 11, weight: .bold))
-                                    .foregroundColor(Color(hex: "#78716C"))
+                                    .foregroundColor(.npSlate)
                                     .padding(.horizontal, 18)
                                     .padding(.top, 14)
 
                                 if activeClientes.isEmpty {
                                     Text("No hay clientes activos")
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "#EF4444"))
+                                        .foregroundColor(.npDanger)
                                         .padding(.horizontal, 18)
                                 } else {
                                     Menu {
@@ -242,18 +242,18 @@ struct VentaFormSwiftUIView: View {
                                     } label: {
                                         HStack {
                                             Image(systemName: "person.fill")
-                                                .foregroundColor(Color(hex: "#6366F1"))
+                                                .foregroundColor(.npIndigo)
                                                 .font(.system(size: 14))
                                             Text(activeClientes.isEmpty ? "Seleccionar" : "\(activeClientes[clienteIdx].nombres ?? "") \(activeClientes[clienteIdx].apellidos ?? "")")
                                                 .font(.system(size: 15))
-                                                .foregroundColor(Color(hex: "#292524"))
+                                                .foregroundColor(.npPrimary)
                                             Spacer()
                                             Image(systemName: "chevron.down")
                                                 .font(.system(size: 12))
-                                                .foregroundColor(Color(hex: "#78716C"))
+                                                .foregroundColor(.npSlate)
                                         }
                                         .padding(14)
-                                        .background(Color.white)
+                                        .background(Color.npCard)
                                         .cornerRadius(12)
                                         .shadow(color: Color.black.opacity(0.04), radius: 4)
                                         .padding(.horizontal, 14)
@@ -266,27 +266,27 @@ struct VentaFormSwiftUIView: View {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text("PRODUCTOS".uppercased())
                                     .font(.system(size: 11, weight: .bold))
-                                    .foregroundColor(Color(hex: "#78716C"))
+                                    .foregroundColor(.npSlate)
                                     .padding(.horizontal, 18)
                                     .padding(.vertical, 10)
 
                                 // Search
                                 HStack {
                                     Image(systemName: "magnifyingglass")
-                                        .foregroundColor(Color(hex: "#78716C"))
+                                        .foregroundColor(.npSlate)
                                         .font(.system(size: 14))
                                     TextField("Buscar producto...", text: $searchTexto)
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "#292524"))
+                                        .foregroundColor(.npPrimary)
                                     if !searchTexto.isEmpty {
                                         Button { searchTexto = "" } label: {
                                             Image(systemName: "xmark.circle.fill")
-                                                .foregroundColor(Color(hex: "#78716C"))
+                                                .foregroundColor(.npSlate)
                                         }
                                     }
                                 }
                                 .padding(10)
-                                .background(Color(hex: "#FFFFFF"))
+                                .background(Color.npCard)
                                 .cornerRadius(10)
                                 .padding(.horizontal, 14)
                                 .padding(.bottom, 8)
@@ -295,10 +295,10 @@ struct VentaFormSwiftUIView: View {
                                     VStack(spacing: 6) {
                                         Image(systemName: "shippingbox")
                                             .font(.system(size: 28))
-                                            .foregroundColor(Color(hex: "#78716C").opacity(0.4))
+                                            .foregroundColor(.npSlate.opacity(0.4))
                                         Text(searchTexto.isEmpty ? "No hay productos disponibles" : "Sin resultados para \"\(searchTexto)\"")
                                             .font(.system(size: 13))
-                                            .foregroundColor(Color(hex: "#78716C"))
+                                            .foregroundColor(.npSlate)
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 30)
@@ -318,12 +318,12 @@ struct VentaFormSwiftUIView: View {
                                 HStack {
                                     Text("CARRITO\(totalItems > 0 ? " (\(totalItems) item\(totalItems != 1 ? "s" : ""))" : "")".uppercased())
                                         .font(.system(size: 11, weight: .bold))
-                                        .foregroundColor(totalItems > 0 ? Color(hex: "#059669") : Color(hex: "#78716C"))
+                                        .foregroundColor(totalItems > 0 ? .npSecondary : .npSlate)
                                     Spacer()
                                     if totalItems > 0 {
                                         Text(formatCurrency(itemsCarrito.reduce(0.0) { $0 + Double($1.cantidad) * $1.producto.precio }))
                                             .font(.system(size: 13, weight: .bold))
-                                            .foregroundColor(Color(hex: "#059669"))
+                                            .foregroundColor(.npSecondary)
                                     }
                                 }
                                 .padding(.horizontal, 18)
@@ -335,7 +335,7 @@ struct VentaFormSwiftUIView: View {
                                         Spacer()
                                         Text("Toca \"AGREGAR\" en los productos de arriba")
                                             .font(.system(size: 13))
-                                            .foregroundColor(Color(hex: "#78716C"))
+                                            .foregroundColor(.npSlate)
                                             .padding(.vertical, 20)
                                         Spacer()
                                     }
@@ -349,20 +349,20 @@ struct VentaFormSwiftUIView: View {
                                     .padding(.bottom, 6)
                                 }
                             }
-                            .background(Color(hex: "#F0FDF4").opacity(0.5))
+                            .background(Color.npCard.opacity(0.4))
 
                             // Totales & Botón
                             if !itemsCarrito.isEmpty {
                                 VStack(spacing: 0) {
                                     VStack(spacing: 8) {
-                                        totalRow("Subtotal", formatCurrency(preview.subtotal), Color(hex: "#292524"))
+                                        totalRow("Subtotal", formatCurrency(preview.subtotal), .npPrimary)
                                         Divider().padding(.horizontal, 4)
-                                        totalRow("IGV (18%)", formatCurrency(preview.igv), Color(hex: "#F59E0B"))
+                                        totalRow("IGV (18%)", formatCurrency(preview.igv), .npWarning)
                                         Divider().padding(.horizontal, 4)
-                                        totalRow("TOTAL", formatCurrency(preview.total), Color(hex: "#059669"))
+                                        totalRow("TOTAL", formatCurrency(preview.total), .npSecondary)
                                     }
                                     .padding(16)
-                                    .background(Color.white)
+                                    .background(Color.npCard)
                                     .cornerRadius(14)
                                     .shadow(color: Color.black.opacity(0.04), radius: 4)
 
@@ -373,7 +373,7 @@ struct VentaFormSwiftUIView: View {
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 16)
-                                    .background(Color(hex: "#F43F5E"))
+                                    .background(.npRose)
                                     .cornerRadius(14)
                             }
                             .padding(.top, 14)
@@ -385,7 +385,7 @@ struct VentaFormSwiftUIView: View {
                             if !error.isEmpty {
                                 Text(error)
                                     .font(.system(size: 13))
-                                    .foregroundColor(Color(hex: "#EF4444"))
+                                    .foregroundColor(.npDanger)
                                     .padding(.horizontal, 18)
                                     .padding(.bottom, 10)
                             }
@@ -407,13 +407,13 @@ struct VentaFormSwiftUIView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(producto.nombre ?? "")
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(Color(hex: "#292524"))
+                    .foregroundColor(.npPrimary)
                 Text("S/ \(String(format: "%.2f", producto.precio))")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color(hex: "#6366F1"))
+                    .foregroundColor(.npIndigo)
                 Text("Stock: \(producto.stock)")
                     .font(.system(size: 11))
-                    .foregroundColor(producto.stock <= 5 ? Color(hex: "#EF4444") : Color(hex: "#78716C"))
+                    .foregroundColor(producto.stock <= 5 ? .npDanger : .npSlate)
             }
 
             Spacer()
@@ -424,7 +424,7 @@ struct VentaFormSwiftUIView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color(hex: "#78716C"))
+                    .background(.npSlate)
                     .cornerRadius(12)
             } else if cantidad > 0 {
                 VStack(spacing: 2) {
@@ -432,7 +432,7 @@ struct VentaFormSwiftUIView: View {
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.white)
                         .frame(width: 18, height: 18)
-                        .background(Color(hex: "#F43F5E"))
+                        .background(.npRose)
                         .clipShape(Circle())
                     Button("+1") {
                         agregarProducto(producto)
@@ -441,7 +441,7 @@ struct VentaFormSwiftUIView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 7)
-                    .background(Color(hex: "#059669"))
+                    .background(.npSecondary)
                     .cornerRadius(14)
                 }
             } else {
@@ -452,12 +452,12 @@ struct VentaFormSwiftUIView: View {
                 .foregroundColor(.white)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(Color(hex: "#F43F5E"))
+                .background(.npRose)
                 .cornerRadius(16)
             }
         }
         .padding(12)
-        .background(Color.white)
+        .background(Color.npCard)
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.03), radius: 2)
     }
@@ -469,10 +469,10 @@ struct VentaFormSwiftUIView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.producto.nombre ?? "")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Color(hex: "#292524"))
+                    .foregroundColor(.npPrimary)
                 Text("S/ \(String(format: "%.2f", item.producto.precio)) c/u")
                     .font(.system(size: 11))
-                    .foregroundColor(Color(hex: "#78716C"))
+                    .foregroundColor(.npSlate)
             }
 
             Spacer()
@@ -488,12 +488,12 @@ struct VentaFormSwiftUIView: View {
                 } label: {
                     Text("−")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(Color(hex: "#EF4444"))
+                        .foregroundColor(.npDanger)
                         .frame(width: 32, height: 30)
                 }
                 Text("\(item.cantidad)")
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(Color(hex: "#292524"))
+                    .foregroundColor(.npPrimary)
                     .frame(minWidth: 28)
                 Button {
                     if item.cantidad < item.producto.stock {
@@ -502,16 +502,16 @@ struct VentaFormSwiftUIView: View {
                 } label: {
                     Text("+")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(Color(hex: "#059669"))
+                        .foregroundColor(.npSecondary)
                         .frame(width: 32, height: 30)
                 }
             }
-            .background(Color(hex: "#F5F5F0"))
+            .background(Color.npMuted.opacity(0.15))
             .cornerRadius(14)
 
             Text("S/ \(String(format: "%.2f", Double(item.cantidad) * item.producto.precio))")
                 .font(.system(size: 14, weight: .bold))
-                .foregroundColor(Color(hex: "#6366F1"))
+                .foregroundColor(.npIndigo)
                 .frame(width: 72, alignment: .trailing)
 
             Button {
@@ -519,12 +519,12 @@ struct VentaFormSwiftUIView: View {
             } label: {
                 Image(systemName: "trash")
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "#EF4444").opacity(0.6))
+                    .foregroundColor(.npDanger.opacity(0.6))
             }
             .padding(.leading, 2)
         }
         .padding(12)
-        .background(Color.white)
+        .background(Color.npCard)
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.03), radius: 2)
     }
@@ -556,7 +556,7 @@ struct VentaFormSwiftUIView: View {
         HStack {
             Text(title)
                 .font(.system(size: 14))
-                .foregroundColor(Color(hex: "#78716C"))
+                .foregroundColor(.npSlate)
             Spacer()
             Text(value)
                 .font(.system(size: 15, weight: .bold))

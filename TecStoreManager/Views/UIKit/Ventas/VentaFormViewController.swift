@@ -131,7 +131,7 @@ extension VentaFormViewController: UITableViewDataSource, UITableViewDelegate {
             cell.contentView.subviews.forEach { $0.removeFromSuperview() }
 
             let card = UIView()
-            card.backgroundColor = .white
+            card.backgroundColor = AppColors.surface
             card.layer.cornerRadius = 14
             card.layer.borderWidth = 1
             card.layer.borderColor = clienteSeleccionado != nil
@@ -142,7 +142,7 @@ extension VentaFormViewController: UITableViewDataSource, UITableViewDelegate {
 
             let icon = UIImageView()
             icon.image = UIImage(systemName: "person.circle.fill")
-            icon.tintColor = UIColor(hex: "#6366F1")
+            icon.tintColor = AppColors.accent
             icon.contentMode = .scaleAspectFit
             icon.translatesAutoresizingMaskIntoConstraints = false
             card.addSubview(icon)
@@ -202,7 +202,7 @@ extension VentaFormViewController: UITableViewDataSource, UITableViewDelegate {
                 cell.contentView.subviews.forEach { $0.removeFromSuperview() }
 
                 let hintView = UIView()
-                hintView.backgroundColor = UIColor(hex: "#F0FDF4")
+                hintView.backgroundColor = AppColors.tintGreen
                 hintView.layer.cornerRadius = 14
                 hintView.translatesAutoresizingMaskIntoConstraints = false
                 cell.contentView.addSubview(hintView)
@@ -210,7 +210,7 @@ extension VentaFormViewController: UITableViewDataSource, UITableViewDelegate {
                 let lbl = UILabel()
                 lbl.text = "Toca \"AGREGAR\" arriba para añadir productos"
                 lbl.font = .systemFont(ofSize: 13)
-                lbl.textColor = UIColor(hex: "#059669")
+                lbl.textColor = AppColors.greenEm
                 lbl.numberOfLines = 0
                 lbl.textAlignment = .center
                 lbl.translatesAutoresizingMaskIntoConstraints = false
@@ -383,7 +383,7 @@ class ProductoCatalogoCell: UITableViewCell {
         backgroundColor = .clear
         selectionStyle = .none
 
-        cardView.backgroundColor = .white
+        cardView.backgroundColor = AppColors.surface
         cardView.layer.cornerRadius = 14
         cardView.layer.shadowColor = UIColor.black.cgColor
         cardView.layer.shadowOpacity = 0.04
@@ -393,12 +393,12 @@ class ProductoCatalogoCell: UITableViewCell {
         contentView.addSubview(cardView)
 
         nombreLabel.font = .systemFont(ofSize: 15, weight: .semibold)
-        nombreLabel.textColor = UIColor(hex: "#292524")
+        nombreLabel.textColor = AppColors.textPrimary
         nombreLabel.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(nombreLabel)
 
         precioLabel.font = .systemFont(ofSize: 15, weight: .bold)
-        precioLabel.textColor = UIColor(hex: "#6366F1")
+        precioLabel.textColor = AppColors.accent
         precioLabel.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(precioLabel)
 
@@ -418,7 +418,7 @@ class ProductoCatalogoCell: UITableViewCell {
         agregarButton.addTarget(self, action: #selector(agregarTapped), for: .touchUpInside)
         cardView.addSubview(agregarButton)
 
-        badgeCarrito.backgroundColor = UIColor(hex: "#F43F5E")
+        badgeCarrito.backgroundColor = AppColors.primary
         badgeCarrito.textColor = .white
         badgeCarrito.font = .systemFont(ofSize: 10, weight: .bold)
         badgeCarrito.textAlignment = .center
@@ -466,42 +466,42 @@ class ProductoCatalogoCell: UITableViewCell {
         precioLabel.text = "S/ \(String(format: "%.2f", producto.precio))"
 
         if producto.stock == 0 {
-            stockBadge.backgroundColor = UIColor(hex: "#FEE2E2")
+            stockBadge.backgroundColor = AppColors.tintRed
             stockLabel.text = "Agotado"
-            stockLabel.textColor = UIColor(hex: "#EF4444")
+            stockLabel.textColor = AppColors.danger
             agregarButton.setTitle("AGOTADO", for: .normal)
-            agregarButton.backgroundColor = UIColor(hex: "#D4D4D8")
+            agregarButton.backgroundColor = AppColors.muted
             agregarButton.isEnabled = false
             badgeCarrito.isHidden = true
         } else if producto.stock <= 5 {
-            stockBadge.backgroundColor = UIColor(hex: "#FEF3C7")
+            stockBadge.backgroundColor = AppColors.tintYellow
             stockLabel.text = "Stock: \(producto.stock)"
-            stockLabel.textColor = UIColor(hex: "#F59E0B")
+            stockLabel.textColor = AppColors.warning
             agregarButton.isEnabled = true
             if cantidadEnCarrito > 0 {
                 badgeCarrito.isHidden = false
                 badgeCarrito.text = "\(cantidadEnCarrito)"
                 agregarButton.setTitle("+1", for: .normal)
-                agregarButton.backgroundColor = UIColor(hex: "#059669")
+                agregarButton.backgroundColor = AppColors.greenEm
             } else {
                 badgeCarrito.isHidden = true
                 agregarButton.setTitle("AGREGAR", for: .normal)
-                agregarButton.backgroundColor = UIColor(hex: "#F43F5E")
+                agregarButton.backgroundColor = AppColors.primary
             }
         } else {
-            stockBadge.backgroundColor = UIColor(hex: "#F0FDF4")
+            stockBadge.backgroundColor = AppColors.tintGreen
             stockLabel.text = "Stock: \(producto.stock)"
-            stockLabel.textColor = UIColor(hex: "#059669")
+            stockLabel.textColor = AppColors.greenEm
             agregarButton.isEnabled = true
             if cantidadEnCarrito > 0 {
                 badgeCarrito.isHidden = false
                 badgeCarrito.text = "\(cantidadEnCarrito)"
                 agregarButton.setTitle("+1", for: .normal)
-                agregarButton.backgroundColor = UIColor(hex: "#059669")
+                agregarButton.backgroundColor = AppColors.greenEm
             } else {
                 badgeCarrito.isHidden = true
                 agregarButton.setTitle("AGREGAR", for: .normal)
-                agregarButton.backgroundColor = UIColor(hex: "#F43F5E")
+                agregarButton.backgroundColor = AppColors.primary
             }
         }
     }
@@ -537,51 +537,51 @@ class CarritoItemCell: UITableViewCell {
         backgroundColor = .clear
         selectionStyle = .none
 
-        cardView.backgroundColor = .white
+        cardView.backgroundColor = AppColors.surface
         cardView.layer.cornerRadius = 14
         cardView.layer.borderWidth = 1
-        cardView.layer.borderColor = UIColor(hex: "#059669").withAlphaComponent(0.15).cgColor
+        cardView.layer.borderColor = AppColors.greenEm.withAlphaComponent(0.15).cgColor
         cardView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(cardView)
 
         nombreLabel.font = .systemFont(ofSize: 14, weight: .semibold)
-        nombreLabel.textColor = UIColor(hex: "#292524")
+        nombreLabel.textColor = AppColors.textPrimary
         nombreLabel.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(nombreLabel)
 
         precioLabel.font = .systemFont(ofSize: 11)
-        precioLabel.textColor = UIColor(hex: "#78716C")
+        precioLabel.textColor = AppColors.textSecondary
         precioLabel.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(precioLabel)
 
         // Stepper
-        stepperView.backgroundColor = UIColor(hex: "#F5F5F0")
+        stepperView.backgroundColor = AppColors.tintWarm
         stepperView.layer.cornerRadius = 16
         stepperView.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(stepperView)
 
         menosButton.setTitle("−", for: .normal)
         menosButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
-        menosButton.setTitleColor(UIColor(hex: "#EF4444"), for: .normal)
+        menosButton.setTitleColor(AppColors.danger, for: .normal)
         menosButton.translatesAutoresizingMaskIntoConstraints = false
         menosButton.addTarget(self, action: #selector(menosTapped), for: .touchUpInside)
         stepperView.addSubview(menosButton)
 
         cantidadLabel.font = .systemFont(ofSize: 15, weight: .bold)
-        cantidadLabel.textColor = UIColor(hex: "#292524")
+        cantidadLabel.textColor = AppColors.textPrimary
         cantidadLabel.textAlignment = .center
         cantidadLabel.translatesAutoresizingMaskIntoConstraints = false
         stepperView.addSubview(cantidadLabel)
 
         masButton.setTitle("+", for: .normal)
         masButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
-        masButton.setTitleColor(UIColor(hex: "#059669"), for: .normal)
+        masButton.setTitleColor(AppColors.greenEm, for: .normal)
         masButton.translatesAutoresizingMaskIntoConstraints = false
         masButton.addTarget(self, action: #selector(masTapped), for: .touchUpInside)
         stepperView.addSubview(masButton)
 
         subtotalLabel.font = .systemFont(ofSize: 15, weight: .bold)
-        subtotalLabel.textColor = UIColor(hex: "#6366F1")
+        subtotalLabel.textColor = AppColors.accent
         subtotalLabel.textAlignment = .right
         subtotalLabel.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(subtotalLabel)
@@ -656,7 +656,7 @@ class TotalFooter: UITableViewHeaderFooterView {
     required init?(coder: NSCoder) { fatalError() }
 
     private func setupUI() {
-        cardView.backgroundColor = .white
+        cardView.backgroundColor = AppColors.surface
         cardView.layer.cornerRadius = 18
         cardView.layer.shadowColor = UIColor.black.cgColor
         cardView.layer.shadowOpacity = 0.08
@@ -667,7 +667,7 @@ class TotalFooter: UITableViewHeaderFooterView {
 
         // Línea decorativa superior
         let topLine = UIView()
-        topLine.backgroundColor = UIColor(hex: "#F43F5E")
+        topLine.backgroundColor = AppColors.primary
         topLine.layer.cornerRadius = 2
         topLine.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(topLine)
@@ -675,14 +675,14 @@ class TotalFooter: UITableViewHeaderFooterView {
         let titleLbl = UILabel()
         titleLbl.text = "RESUMEN DE VENTA"
         titleLbl.font = .systemFont(ofSize: 11, weight: .bold)
-        titleLbl.textColor = UIColor(hex: "#78716C")
+        titleLbl.textColor = AppColors.textSecondary
         titleLbl.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(titleLbl)
 
         let rows = [
-            ("Subtotal", subtotalLabel, UIColor(hex: "#292524"), false),
-            ("IGV (18%)", igvLabel, UIColor(hex: "#F59E0B"), false),
-            ("Total", totalLabel, UIColor(hex: "#059669"), true)
+            ("Subtotal", subtotalLabel, AppColors.textPrimary, false),
+            ("IGV (18%)", igvLabel, AppColors.warning, false),
+            ("Total", totalLabel, AppColors.greenEm, true)
         ]
 
         var topAnchor = titleLbl.bottomAnchor
@@ -692,7 +692,7 @@ class TotalFooter: UITableViewHeaderFooterView {
             let t = UILabel()
             t.text = title
             t.font = big ? .systemFont(ofSize: 15, weight: .bold) : .systemFont(ofSize: 13)
-            t.textColor = UIColor(hex: "#78716C")
+            t.textColor = AppColors.textSecondary
             t.translatesAutoresizingMaskIntoConstraints = false
             cardView.addSubview(t)
 
@@ -727,7 +727,7 @@ class TotalFooter: UITableViewHeaderFooterView {
 
         registrarButton.setTitle("  Registrar Venta  ", for: .normal)
         registrarButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
-        registrarButton.backgroundColor = UIColor(hex: "#F43F5E")
+        registrarButton.backgroundColor = AppColors.primary
         registrarButton.setTitleColor(.white, for: .normal)
         registrarButton.layer.cornerRadius = 16
         registrarButton.translatesAutoresizingMaskIntoConstraints = false
@@ -735,7 +735,7 @@ class TotalFooter: UITableViewHeaderFooterView {
         cardView.addSubview(registrarButton)
 
         cancelarButton.setTitle("Cancelar venta", for: .normal)
-        cancelarButton.setTitleColor(UIColor(hex: "#EF4444"), for: .normal)
+        cancelarButton.setTitleColor(AppColors.danger, for: .normal)
         cancelarButton.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
         cancelarButton.translatesAutoresizingMaskIntoConstraints = false
         cancelarButton.addTarget(self, action: #selector(cancelarTapped), for: .touchUpInside)

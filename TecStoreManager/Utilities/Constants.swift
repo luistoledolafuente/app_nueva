@@ -1,29 +1,35 @@
 import UIKit
 import SwiftUI
 
-// MARK: - Colores
+// MARK: - Colores (adaptativo light/dark)
 enum AppColors {
     
     // UIKit
     static let primary       = UIColor(hex: "#F43F5E")
     static let primaryDark   = UIColor(hex: "#BE123C")
-    static let background    = UIColor(hex: "#FAFAF9")
-    static let surface       = UIColor(hex: "#FFFFFF")
-    static let surfaceCard   = UIColor(hex: "#FFFFFF")
-    static let textPrimary   = UIColor(hex: "#292524")
-    static let textSecondary = UIColor(hex: "#78716C")
+    static let background    = UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#0F172A") : UIColor(hex: "#FAFAF9") })
+    static let surface       = UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#1E293B") : UIColor(hex: "#FFFFFF") })
+    static let surfaceCard   = UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#1E293B") : UIColor(hex: "#FFFFFF") })
+    static let textPrimary   = UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#F8FAFC") : UIColor(hex: "#292524") })
+    static let textSecondary = UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#94A3B8") : UIColor(hex: "#78716C") })
     static let accent        = UIColor(hex: "#6366F1")
     static let success       = UIColor(hex: "#22C55E")
     static let danger        = UIColor(hex: "#EF4444")
     static let warning       = UIColor(hex: "#F59E0B")
+    static let greenEm       = UIColor(hex: "#059669")
+    static let tintGreen    = UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#064E3B") : UIColor(hex: "#F0FDF4") })
+    static let tintWarm     = UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#292524") : UIColor(hex: "#F5F5F0") })
+    static let tintRed      = UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#7F1D1D") : UIColor(hex: "#FEE2E2") })
+    static let tintYellow   = UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#78350F") : UIColor(hex: "#FEF3C7") })
+    static let muted        = UIColor(hex: "#D4D4D8")
 
     // SwiftUI
     static let swPrimary     = Color(hex: "#F43F5E")
-    static let swBackground  = Color(hex: "#FAFAF9")
-    static let swSurface     = Color(hex: "#FFFFFF")
-    static let swSurfaceCard = Color(hex: "#FFFFFF")
+    static let swBackground  = Color(UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#0F172A") : UIColor(hex: "#FAFAF9") }))
+    static let swSurface     = Color(UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#1E293B") : UIColor(hex: "#FFFFFF") }))
+    static let swSurfaceCard = Color(UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#1E293B") : UIColor(hex: "#FFFFFF") }))
     static let swAccent      = Color(hex: "#6366F1")
-    static let swTextSecond  = Color(hex: "#78716C")
+    static let swTextSecond  = Color(UIColor(dynamicProvider: { t in t.userInterfaceStyle == .dark ? UIColor(hex: "#94A3B8") : UIColor(hex: "#78716C") }))
     static let swSuccess     = Color(hex: "#22C55E")
     static let swDanger      = Color(hex: "#EF4444")
     static let swWarning     = Color(hex: "#F59E0B")

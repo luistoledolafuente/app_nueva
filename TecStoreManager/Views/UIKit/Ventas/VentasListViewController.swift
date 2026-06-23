@@ -190,7 +190,7 @@ class VentaCell: UITableViewCell {
         cardView.backgroundColor    = AppColors.surface
         cardView.layer.cornerRadius = 12
         cardView.layer.borderWidth  = 0.5
-        cardView.layer.borderColor  = UIColor(hex: "#059669").withAlphaComponent(0.2).cgColor
+        cardView.layer.borderColor  = AppColors.greenEm.withAlphaComponent(0.2).cgColor
         cardView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(cardView)
         
