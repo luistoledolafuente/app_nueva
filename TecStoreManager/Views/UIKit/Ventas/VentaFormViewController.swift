@@ -19,362 +19,320 @@ class VentaFormViewController: UIViewController {
     private var clienteSeleccionado: Cliente?
     private var itemsCarrito: [ItemCarrito] = []
 
-    // UI elements (programáticos)
-    private let scrollView      = UIScrollView()
-    private let contentView     = UIView()
-    private let clienteLabel    = UILabel()
-    private let clienteField    = UITextField()
-    private let prodLabel       = UILabel()
-    private let tableView       = UITableView()
-    private let agregarButton   = UIButton()
-    private let cardView        = UIView()
-    private let subtotalTitle   = UILabel()
-    private let subtotalLabel   = UILabel()
-    private let igvTitle        = UILabel()
-    private let igvLabel        = UILabel()
-    private let totalTitle      = UILabel()
-    private let totalLabel      = UILabel()
-    private let errorLabel      = UILabel()
-    private let registrarButton = UIButton()
-    private let cancelarButton  = UIButton()
+    // MARK: - UI
+    private let tableView = UITableView(frame: .zero, style: .grouped)
 
-    private var contentHeightConstraint: NSLayoutConstraint!
-
-    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupViews()
-        setupConstraints()
-        setupActions()
-        setupTableView()
-        cargarDatos()
-        layoutContenido()
-    }
-
-    // MARK: - Setup inicial (una sola vez)
-    private func setupViews() {
         view.backgroundColor = AppColors.background
         title = "Nueva Venta"
         navigationController?.navigationBar.tintColor = AppColors.accent
 
-        clienteLabel.text = "Cliente"
-        clienteLabel.font = .systemFont(ofSize: 13, weight: .medium)
-        clienteLabel.textColor = AppColors.textSecondary
-
-        setupTextField(clienteField, placeholder: "Seleccionar cliente")
-
-        prodLabel.text = "Productos"
-        prodLabel.font = .systemFont(ofSize: 13, weight: .medium)
-        prodLabel.textColor = AppColors.textSecondary
-
-        agregarButton.setTitle("+ Agregar Producto", for: .normal)
-        agregarButton.backgroundColor    = AppColors.accent
-        agregarButton.setTitleColor(.white, for: .normal)
-        agregarButton.titleLabel?.font   = .systemFont(ofSize: 14, weight: .semibold)
-        agregarButton.layer.cornerRadius = 10
-
-        cardView.backgroundColor = AppColors.surface
-        cardView.layer.cornerRadius = 10
-        cardView.layer.borderWidth = 0.5
-        cardView.layer.borderColor = AppColors.primary.withAlphaComponent(0.15).cgColor
-
-        let titles = ["Subtotal", "IGV (18%)", "Total"]
-        let labels = [subtotalTitle, igvTitle, totalTitle]
-        for (t, l) in zip(titles, labels) {
-            l.text = t
-            l.font = .systemFont(ofSize: 14)
-            l.textColor = AppColors.textSecondary
-        }
-
-        for lbl in [subtotalLabel, igvLabel] {
-            lbl.font = .systemFont(ofSize: 15, weight: .semibold)
-            lbl.textAlignment = .right
-        }
-        subtotalLabel.textColor = AppColors.textPrimary
-        igvLabel.textColor      = AppColors.warning
-
-        totalLabel.font          = .systemFont(ofSize: 20, weight: .bold)
-        totalLabel.textColor     = AppColors.success
-        totalLabel.textAlignment = .right
-
-        subtotalLabel.text = "S/ 0.00"
-        igvLabel.text      = "S/ 0.00"
-        totalLabel.text    = "S/ 0.00"
-
-        errorLabel.textColor     = AppColors.danger
-        errorLabel.font          = .systemFont(ofSize: 13)
-        errorLabel.numberOfLines = 0
-        errorLabel.textAlignment = .center
-
-        registrarButton.setTitle("Registrar Venta", for: .normal)
-        registrarButton.backgroundColor    = AppColors.primary
-        registrarButton.setTitleColor(.white, for: .normal)
-        registrarButton.titleLabel?.font   = .systemFont(ofSize: 16, weight: .semibold)
-        registrarButton.layer.cornerRadius = 12
-
-        cancelarButton.setTitle("Cancelar", for: .normal)
-        cancelarButton.setTitleColor(AppColors.danger, for: .normal)
-        cancelarButton.titleLabel?.font = .systemFont(ofSize: 15)
-    }
-
-    private func setupConstraints() {
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-
-        contentHeightConstraint = contentView.heightAnchor.constraint(equalToConstant: 800)
-
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            contentHeightConstraint
-        ])
-    }
-
-    private func setupActions() {
-        clienteField.addTarget(self, action: #selector(clienteFieldTapped), for: .editingDidBegin)
-        agregarButton.addTarget(self, action: #selector(agregarProductoTapped), for: .touchUpInside)
-        registrarButton.addTarget(self, action: #selector(registrarTapped), for: .touchUpInside)
-        cancelarButton.addTarget(self, action: #selector(cancelarTapped), for: .touchUpInside)
-    }
-
-    // MARK: - Layout dinámico (se llama al iniciar y al cambiar items)
-    private func layoutContenido() {
-        let width = view.frame.width
-
-        // Agregar/remover subvistas de contentView
-        let subviews: [UIView] = [
-            clienteLabel, clienteField,
-            prodLabel, tableView, agregarButton,
-            cardView, errorLabel, registrarButton, cancelarButton
-        ]
-        for sv in subviews {
-            if sv.superview !== contentView { contentView.addSubview(sv) }
-        }
-
-        var yOffset: CGFloat = 16
-
-        clienteLabel.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 18)
-        yOffset += 24
-
-        clienteField.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 44)
-        yOffset += 60
-
-        prodLabel.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 18)
-        yOffset += 24
-
-        let tableH = min(CGFloat(itemsCarrito.count) * 84 + 8, 300)
-        tableView.frame = CGRect(x: 16, y: yOffset, width: width - 32, height: tableH)
-        yOffset += tableH + 8
-
-        agregarButton.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 40)
-        yOffset += 56
-
-        cardView.frame = CGRect(x: 16, y: yOffset, width: width - 32, height: 140)
-
-        // Layout dentro de cardView
-        let cardSubviews: [UIView] = [
-            subtotalTitle, subtotalLabel,
-            igvTitle, igvLabel,
-            totalTitle, totalLabel
-        ]
-        for sv in cardSubviews {
-            if sv.superview !== cardView { cardView.addSubview(sv) }
-        }
-
-        var cy: CGFloat = 12
-        let rowW = cardView.frame.width - 160
-
-        subtotalTitle.frame = CGRect(x: 16, y: cy, width: 120, height: 22)
-        subtotalLabel.frame = CGRect(x: 140, y: cy, width: rowW, height: 22)
-        cy += 30
-        igvTitle.frame = CGRect(x: 16, y: cy, width: 120, height: 22)
-        igvLabel.frame = CGRect(x: 140, y: cy, width: rowW, height: 22)
-        cy += 30
-        totalTitle.frame = CGRect(x: 16, y: cy, width: 120, height: 22)
-        totalLabel.frame = CGRect(x: 140, y: cy, width: rowW, height: 22)
-
-        yOffset += cardView.frame.height + 16
-
-        errorLabel.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 20)
-        yOffset += 28
-
-        registrarButton.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 50)
-        yOffset += 62
-
-        cancelarButton.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 40)
-        yOffset += 60
-
-        contentHeightConstraint.constant = yOffset
-    }
-
-    private func setupTextField(_ field: UITextField, placeholder: String) {
-        field.placeholder           = placeholder
-        field.backgroundColor       = AppColors.surface
-        field.textColor             = AppColors.textPrimary
-        field.layer.cornerRadius    = 12
-        field.layer.borderWidth     = 0.5
-        field.layer.borderColor     = AppColors.primary.withAlphaComponent(0.3).cgColor
-        field.leftView              = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
-        field.leftViewMode          = .always
-        field.attributedPlaceholder = NSAttributedString(
-            string: placeholder,
-            attributes: [.foregroundColor: AppColors.textSecondary]
-        )
+        setupTableView()
+        cargarDatos()
     }
 
     private func setupTableView() {
         tableView.backgroundColor = AppColors.background
-        tableView.separatorStyle  = .none
-        tableView.delegate        = self
-        tableView.dataSource      = self
-        tableView.register(CarritoCell.self, forCellReuseIdentifier: CarritoCell.identifier)
-        tableView.layer.cornerRadius = 10
+        tableView.separatorStyle = .none
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "ClienteCell")
+        tableView.register(ProductoCatalogoCell.self, forCellReuseIdentifier: ProductoCatalogoCell.id)
+        tableView.register(CarritoItemCell.self, forCellReuseIdentifier: CarritoItemCell.id)
+        tableView.register(TotalFooter.self, forHeaderFooterViewReuseIdentifier: TotalFooter.id)
+
+        tableView.estimatedRowHeight = 60
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.contentInset.bottom = 20
+
+        view.addSubview(tableView)
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
 
     private func cargarDatos() {
         clientes  = clienteRepo.obtenerTodos()
-        productos = productoRepo.obtenerTodos()
+        productos = productoRepo.obtenerTodos().filter { $0.stock > 0 && $0.estado }
     }
 
-    // MARK: - Totales
-    private func actualizarTotales() {
-        let subtotal = itemsCarrito.reduce(0.0) { $0 + $1.subtotal }
-        let igv      = subtotal * AppConstants.igvRate
-        let total    = subtotal + igv
-
-        subtotalLabel.text = "S/ \(String(format: "%.2f", subtotal))"
-        igvLabel.text      = "S/ \(String(format: "%.2f", igv))"
-        totalLabel.text    = "S/ \(String(format: "%.2f", total))"
-
-        layoutContenido()
+    private func agregarAlCarrito(producto: Producto, cantidad: Int) {
+        if let idx = itemsCarrito.firstIndex(where: { $0.producto.idProducto == producto.idProducto }) {
+            itemsCarrito[idx].cantidad += cantidad
+        } else {
+            itemsCarrito.append(ItemCarrito(producto: producto, cantidad: cantidad, precioUnitario: producto.precio))
+        }
         tableView.reloadData()
+        // Scroll al carrito
+        if itemsCarrito.count == 1 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                let carritoSec = self.productos.isEmpty ? 1 : 2
+                self.tableView.scrollToRow(at: IndexPath(row: 0, section: carritoSec), at: .top, animated: true)
+            }
+        }
     }
 
-    // MARK: - Actions
-    @objc private func clienteFieldTapped() {
-        clienteField.resignFirstResponder()
-        let alert = UIAlertController(title: "Seleccionar Cliente", message: nil, preferredStyle: .actionSheet)
-        for cliente in clientes {
-            alert.addAction(UIAlertAction(title: "\(cliente.nombres ?? "") \(cliente.apellidos ?? "")", style: .default) { _ in
-                self.clienteSeleccionado = cliente
-                self.clienteField.text   = "\(cliente.nombres ?? "") \(cliente.apellidos ?? "")"
-            })
-        }
-        alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
-        present(alert, animated: true)
-    }
-
-    @objc private func agregarProductoTapped() {
-        let alert = UIAlertController(title: "Agregar Producto", message: nil, preferredStyle: .actionSheet)
-        for producto in productos where producto.stock > 0 {
-            alert.addAction(UIAlertAction(title: "\(producto.nombre ?? "") - S/ \(String(format: "%.2f", producto.precio)) (Stock: \(producto.stock))", style: .default) { _ in
-                self.pedirCantidad(producto: producto)
-            })
-        }
-        alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
-        present(alert, animated: true)
-    }
-
-    private func pedirCantidad(producto: Producto) {
-        let alert = UIAlertController(title: "Cantidad", message: "Producto: \(producto.nombre ?? "")\nStock disponible: \(producto.stock)", preferredStyle: .alert)
-        alert.addTextField { tf in
-            tf.placeholder = "Cantidad"
-            tf.keyboardType = .numberPad
-        }
-        alert.addAction(UIAlertAction(title: "Agregar", style: .default) { _ in
-            let cantidadStr = alert.textFields?.first?.text ?? ""
-            guard let cantidad = Int(cantidadStr), cantidad > 0, cantidad <= producto.stock else {
-                self.errorLabel.text = "Cantidad inválida o excede el stock"
+    // Al tocar "AGREGAR" en un producto, se añade 1 unidad al carrito
+    // Si ya está en el carrito, se incrementa la cantidad en 1
+    private func agregarProductoAlCarrito(producto: Producto) {
+        guard producto.stock > 0 else { return }
+        if let idx = itemsCarrito.firstIndex(where: { $0.producto.idProducto == producto.idProducto }) {
+            guard itemsCarrito[idx].cantidad < producto.stock else {
+                showError("Stock máximo alcanzado para \(producto.nombre ?? "")")
                 return
             }
-            if let idx = self.itemsCarrito.firstIndex(where: { $0.producto.idProducto == producto.idProducto }) {
-                let nuevaCant = self.itemsCarrito[idx].cantidad + cantidad
-                if nuevaCant > producto.stock {
-                    self.errorLabel.text = "Stock insuficiente para \(producto.nombre ?? "")"
-                    return
-                }
-                self.itemsCarrito[idx].cantidad = nuevaCant
-            } else {
-                self.itemsCarrito.append(ItemCarrito(producto: producto, cantidad: cantidad, precioUnitario: producto.precio))
+            itemsCarrito[idx].cantidad += 1
+        } else {
+            itemsCarrito.append(ItemCarrito(producto: producto, cantidad: 1, precioUnitario: producto.precio))
+        }
+        tableView.reloadData()
+        // Scroll al carrito después de agregar el primer producto
+        if itemsCarrito.count == 1 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                let sec = self.productos.isEmpty ? 1 : 2
+                self.tableView.scrollToRow(at: IndexPath(row: 0, section: sec), at: .top, animated: true)
             }
-            self.errorLabel.text = ""
-            self.actualizarTotales()
-        })
-        alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
+        }
+    }
+
+    private func showError(_ msg: String) {
+        // Mostrar error como toast simple
+        let alert = UIAlertController(title: nil, message: msg, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
 
-    @objc private func registrarTapped() {
+    @objc private func registrarVenta() {
         guard let cliente = clienteSeleccionado else {
-            errorLabel.text = "Selecciona un cliente"
+            showError("Selecciona un cliente")
             return
         }
         guard !itemsCarrito.isEmpty else {
-            errorLabel.text = "Agrega al menos un producto"
+            showError("Agrega al menos un producto al carrito")
             return
         }
-
-        let productosVenta = itemsCarrito.map { ($0.producto, $0.cantidad) }
-        if viewModel.crear(cliente: cliente, productos: productosVenta) {
+        let prods = itemsCarrito.map { ($0.producto, $0.cantidad) }
+        if viewModel.crear(cliente: cliente, productos: prods) {
             navigationController?.popViewController(animated: true)
         } else {
-            errorLabel.text = viewModel.errorMessage
+            showError(viewModel.errorMessage)
         }
-    }
-
-    @objc private func cancelarTapped() {
-        navigationController?.popViewController(animated: true)
-    }
-
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        view.endEditing(true)
     }
 }
 
-// MARK: - UITableViewDataSource & Delegate
+// MARK: - UITableView
 extension VentaFormViewController: UITableViewDataSource, UITableViewDelegate {
 
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return productos.isEmpty ? 2 : 3  // 0:Cliente, 1:Productos, 2:Carrito
+    }
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemsCarrito.count
+        switch section {
+        case 0: return 1                // Cliente
+        case 1: return productos.count  // Catálogo
+        case 2: return max(itemsCarrito.count, 1) // 1 fila de hint si está vacío
+        default: return 0
+        }
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: CarritoCell.identifier, for: indexPath) as! CarritoCell
-        cell.configure(with: itemsCarrito[indexPath.row])
-        cell.onDelete = { [weak self] in
-            self?.itemsCarrito.remove(at: indexPath.row)
-            self?.actualizarTotales()
+        switch indexPath.section {
+        case 0:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ClienteCell", for: indexPath)
+            cell.backgroundColor = .clear
+            cell.selectionStyle = .none
+            cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+
+            let field = UITextField()
+            field.placeholder = "Seleccionar cliente"
+            field.text = clienteSeleccionado.map { "\($0.nombres ?? "") \($0.apellidos ?? "")" }
+            field.backgroundColor = AppColors.surface
+            field.textColor = AppColors.textPrimary
+            field.layer.cornerRadius = 12
+            field.layer.borderWidth = 0.5
+            field.layer.borderColor = AppColors.primary.withAlphaComponent(0.3).cgColor
+            field.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
+            field.leftViewMode = .always
+            field.translatesAutoresizingMaskIntoConstraints = false
+            field.isUserInteractionEnabled = false
+
+            cell.contentView.addSubview(field)
+            NSLayoutConstraint.activate([
+                field.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 4),
+                field.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16),
+                field.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -16),
+                field.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -4),
+                field.heightAnchor.constraint(equalToConstant: 44)
+            ])
+            return cell
+
+        case 1:
+            let cell = tableView.dequeueReusableCell(withIdentifier: ProductoCatalogoCell.id, for: indexPath) as! ProductoCatalogoCell
+            let p = productos[indexPath.row]
+            let enCarrito = itemsCarrito.first { $0.producto.idProducto == p.idProducto }
+            cell.configure(with: p, cantidadEnCarrito: enCarrito?.cantidad ?? 0)
+            cell.onAgregar = { [weak self] in
+                self?.agregarProductoAlCarrito(producto: p)
+            }
+            return cell
+
+        case 2:
+            if itemsCarrito.isEmpty {
+                let cell = tableView.dequeueReusableCell(withIdentifier: "ClienteCell", for: indexPath)
+                cell.backgroundColor = .clear
+                cell.selectionStyle = .none
+                cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+                let lbl = UILabel()
+                lbl.text = "Toca \"AGREGAR\" en los productos de arriba para añadirlos al carrito 🛒"
+                lbl.font = .systemFont(ofSize: 13)
+                lbl.textColor = AppColors.textSecondary
+                lbl.numberOfLines = 0
+                lbl.textAlignment = .center
+                lbl.translatesAutoresizingMaskIntoConstraints = false
+                cell.contentView.addSubview(lbl)
+                NSLayoutConstraint.activate([
+                    lbl.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
+                    lbl.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+                    lbl.leadingAnchor.constraint(greaterThanOrEqualTo: cell.contentView.leadingAnchor, constant: 40),
+                    lbl.trailingAnchor.constraint(lessThanOrEqualTo: cell.contentView.trailingAnchor, constant: -40)
+                ])
+                return cell
+            }
+            let cell = tableView.dequeueReusableCell(withIdentifier: CarritoItemCell.id, for: indexPath) as! CarritoItemCell
+            let item = itemsCarrito[indexPath.row]
+            cell.configure(with: item)
+            cell.onMas = { [weak self] in
+                guard let self = self else { return }
+                if item.cantidad < item.producto.stock {
+                    self.itemsCarrito[indexPath.row].cantidad += 1
+                    self.tableView.reloadData()
+                }
+            }
+            cell.onMenos = { [weak self] in
+                guard let self = self else { return }
+                if item.cantidad > 1 {
+                    self.itemsCarrito[indexPath.row].cantidad -= 1
+                } else {
+                    self.itemsCarrito.remove(at: indexPath.row)
+                }
+                self.tableView.reloadData()
+            }
+            cell.onEliminar = { [weak self] in
+                self?.itemsCarrito.remove(at: indexPath.row)
+                self?.tableView.reloadData()
+            }
+            return cell
+
+        default: return UITableViewCell()
         }
-        return cell
     }
 
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 80
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        if indexPath.section == 0 {
+            let alert = UIAlertController(title: "Seleccionar Cliente", message: nil, preferredStyle: .actionSheet)
+            for c in clientes {
+                alert.addAction(UIAlertAction(title: "\(c.nombres ?? "") \(c.apellidos ?? "")", style: .default) { _ in
+                    self.clienteSeleccionado = c
+                    self.tableView.reloadRows(at: [indexPath], with: .none)
+                })
+            }
+            alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
+            present(alert, animated: true)
+        }
+    }
+
+    // MARK: - Headers
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let h = UIView()
+        h.backgroundColor = .clear
+
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        h.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: h.leadingAnchor, constant: 20),
+            label.trailingAnchor.constraint(equalTo: h.trailingAnchor, constant: -20),
+            label.bottomAnchor.constraint(equalTo: h.bottomAnchor, constant: -6)
+        ])
+
+        switch section {
+        case 0:
+            label.text = "CLIENTE"
+            label.font = .systemFont(ofSize: 12, weight: .bold)
+            label.textColor = AppColors.textSecondary
+        case 1:
+            label.text = "PRODUCTOS — toca AGREGAR para añadir al carrito"
+            label.font = .systemFont(ofSize: 12, weight: .bold)
+            label.textColor = AppColors.textSecondary
+        case 2:
+            let count = itemsCarrito.reduce(0) { $0 + $1.cantidad }
+            label.text = "CARRITO (\(count) item\(count != 1 ? "s" : ""))"
+            label.font = .systemFont(ofSize: 12, weight: .bold)
+            label.textColor = AppColors.accent
+            // Badge de total
+            let total = itemsCarrito.reduce(0.0) { $0 + $1.subtotal }
+            let totalLbl = UILabel()
+            totalLbl.text = "S/ \(String(format: "%.2f", total))"
+            totalLbl.font = .systemFont(ofSize: 13, weight: .bold)
+            totalLbl.textColor = AppColors.success
+            totalLbl.textAlignment = .right
+            totalLbl.translatesAutoresizingMaskIntoConstraints = false
+            h.addSubview(totalLbl)
+            NSLayoutConstraint.activate([
+                totalLbl.trailingAnchor.constraint(equalTo: h.trailingAnchor, constant: -20),
+                totalLbl.bottomAnchor.constraint(equalTo: h.bottomAnchor, constant: -6)
+            ])
+        default: break
+        }
+        return h
+    }
+
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 32
+    }
+
+    // MARK: - Footer
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        guard section == (productos.isEmpty ? 1 : 2), !itemsCarrito.isEmpty else { return nil }
+
+        let footer = tableView.dequeueReusableHeaderFooterView(withIdentifier: TotalFooter.id) as! TotalFooter
+        let subtotal = itemsCarrito.reduce(0.0) { $0 + $1.subtotal }
+        let igv = subtotal * AppConstants.igvRate
+        let total = subtotal + igv
+        footer.configure(subtotal: subtotal, igv: igv, total: total)
+
+        footer.onRegistrar = { [weak self] in self?.registrarVenta() }
+        footer.onCancelar = { [weak self] in self?.navigationController?.popViewController(animated: true) }
+        return footer
+    }
+
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        guard section == (productos.isEmpty ? 1 : 2), !itemsCarrito.isEmpty else { return 0 }
+        return 260
     }
 }
 
-// MARK: - CarritoCell
-class CarritoCell: UITableViewCell {
+// MARK: - ProductoCatalogoCell
+class ProductoCatalogoCell: UITableViewCell {
+    static let id = "ProductoCatalogoCell"
 
-    static let identifier = "CarritoCell"
+    private let cardView = UIView()
+    private let nombreLabel = UILabel()
+    private let precioLabel = UILabel()
+    private let stockLabel = UILabel()
+    private let agregarButton = UIButton()
+    private let badgeCarrito = UILabel()
+    private let enCarritoLabel = UILabel()
 
-    var onDelete: (() -> Void)?
-
-    private let cardView       = UIView()
-    private let nombreLabel    = UILabel()
-    private let cantidadLabel  = UILabel()
-    private let precioLabel    = UILabel()
-    private let subtotalLabel  = UILabel()
-    private let deleteButton   = UIButton()
+    var onAgregar: (() -> Void)?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -385,42 +343,204 @@ class CarritoCell: UITableViewCell {
 
     private func setupUI() {
         backgroundColor = .clear
-        selectionStyle  = .none
+        selectionStyle = .none
 
-        cardView.backgroundColor    = AppColors.surface
-        cardView.layer.cornerRadius = 10
-        cardView.layer.borderWidth  = 0.5
-        cardView.layer.borderColor  = AppColors.primary.withAlphaComponent(0.15).cgColor
+        cardView.backgroundColor = AppColors.surface
+        cardView.layer.cornerRadius = 12
+        cardView.layer.borderWidth = 1
+        cardView.layer.borderColor = AppColors.primary.withAlphaComponent(0.12).cgColor
         cardView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(cardView)
 
-        nombreLabel.font      = .systemFont(ofSize: 14, weight: .semibold)
+        nombreLabel.font = .systemFont(ofSize: 15, weight: .semibold)
         nombreLabel.textColor = AppColors.textPrimary
         nombreLabel.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(nombreLabel)
 
-        cantidadLabel.font      = .systemFont(ofSize: 12)
-        cantidadLabel.textColor = AppColors.textSecondary
-        cantidadLabel.translatesAutoresizingMaskIntoConstraints = false
-        cardView.addSubview(cantidadLabel)
+        precioLabel.font = .systemFont(ofSize: 16, weight: .bold)
+        precioLabel.textColor = AppColors.accent
+        precioLabel.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(precioLabel)
 
-        precioLabel.font      = .systemFont(ofSize: 12)
+        stockLabel.font = .systemFont(ofSize: 11)
+        stockLabel.textColor = AppColors.textSecondary
+        stockLabel.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(stockLabel)
+
+        enCarritoLabel.font = .systemFont(ofSize: 11, weight: .medium)
+        enCarritoLabel.textColor = AppColors.success
+        enCarritoLabel.isHidden = true
+        enCarritoLabel.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(enCarritoLabel)
+
+        // Botón AGREGAR grande y visible
+        agregarButton.setTitle("  AGREGAR  ", for: .normal)
+        agregarButton.titleLabel?.font = .systemFont(ofSize: 12, weight: .bold)
+        agregarButton.backgroundColor = AppColors.primary
+        agregarButton.setTitleColor(.white, for: .normal)
+        agregarButton.layer.cornerRadius = 16
+        agregarButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+        agregarButton.translatesAutoresizingMaskIntoConstraints = false
+        agregarButton.addTarget(self, action: #selector(agregarTapped), for: .touchUpInside)
+        cardView.addSubview(agregarButton)
+
+        badgeCarrito.backgroundColor = AppColors.primary
+        badgeCarrito.textColor = .white
+        badgeCarrito.font = .systemFont(ofSize: 10, weight: .bold)
+        badgeCarrito.textAlignment = .center
+        badgeCarrito.layer.cornerRadius = 10
+        badgeCarrito.clipsToBounds = true
+        badgeCarrito.isHidden = true
+        badgeCarrito.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(badgeCarrito)
+
+        NSLayoutConstraint.activate([
+            cardView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 5),
+            cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            cardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            cardView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5),
+
+            nombreLabel.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 12),
+            nombreLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 14),
+            nombreLabel.trailingAnchor.constraint(equalTo: agregarButton.leadingAnchor, constant: -8),
+
+            precioLabel.topAnchor.constraint(equalTo: nombreLabel.bottomAnchor, constant: 2),
+            precioLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 14),
+
+            stockLabel.topAnchor.constraint(equalTo: precioLabel.bottomAnchor, constant: 2),
+            stockLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 14),
+            stockLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -12),
+
+            enCarritoLabel.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 12),
+            enCarritoLabel.trailingAnchor.constraint(equalTo: agregarButton.leadingAnchor, constant: -6),
+
+            agregarButton.centerYAnchor.constraint(equalTo: cardView.centerYAnchor),
+            agregarButton.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -12),
+            agregarButton.heightAnchor.constraint(equalToConstant: 34),
+
+            badgeCarrito.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 6),
+            badgeCarrito.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -6),
+            badgeCarrito.widthAnchor.constraint(equalToConstant: 20),
+            badgeCarrito.heightAnchor.constraint(equalToConstant: 20)
+        ])
+    }
+
+    func configure(with producto: Producto, cantidadEnCarrito: Int) {
+        nombreLabel.text = producto.nombre ?? ""
+        precioLabel.text = "S/ \(String(format: "%.2f", producto.precio))"
+        stockLabel.text = "Stock: \(producto.stock)"
+        stockLabel.textColor = producto.stock <= 5 ? AppColors.danger : AppColors.textSecondary
+
+        if cantidadEnCarrito > 0 {
+            badgeCarrito.isHidden = false
+            badgeCarrito.text = "\(cantidadEnCarrito)"
+            enCarritoLabel.isHidden = false
+            enCarritoLabel.text = "\(cantidadEnCarrito) en carrito"
+            agregarButton.setTitle("+1", for: .normal)
+            agregarButton.backgroundColor = AppColors.success
+        } else {
+            badgeCarrito.isHidden = true
+            enCarritoLabel.isHidden = true
+            agregarButton.setTitle("AGREGAR", for: .normal)
+            agregarButton.backgroundColor = AppColors.primary
+        }
+
+        if producto.stock == 0 {
+            agregarButton.setTitle("AGOTADO", for: .normal)
+            agregarButton.backgroundColor = AppColors.textSecondary
+            agregarButton.isEnabled = false
+        } else {
+            agregarButton.isEnabled = true
+        }
+    }
+
+    @objc private func agregarTapped() { onAgregar?() }
+}
+
+// MARK: - CarritoItemCell
+class CarritoItemCell: UITableViewCell {
+    static let id = "CarritoItemCell"
+
+    private let cardView = UIView()
+    private let nombreLabel = UILabel()
+    private let precioLabel = UILabel()
+    private let stepperView = UIView()
+    private let menosButton = UIButton()
+    private let cantidadLabel = UILabel()
+    private let masButton = UIButton()
+    private let subtotalLabel = UILabel()
+    private let eliminarButton = UIButton()
+
+    var onMas: (() -> Void)?
+    var onMenos: (() -> Void)?
+    var onEliminar: (() -> Void)?
+
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupUI()
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    private func setupUI() {
+        backgroundColor = .clear
+        selectionStyle = .none
+
+        cardView.backgroundColor = AppColors.surface
+        cardView.layer.cornerRadius = 12
+        cardView.layer.borderWidth = 1
+        cardView.layer.borderColor = AppColors.accent.withAlphaComponent(0.2).cgColor
+        cardView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(cardView)
+
+        nombreLabel.font = .systemFont(ofSize: 14, weight: .semibold)
+        nombreLabel.textColor = AppColors.textPrimary
+        nombreLabel.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(nombreLabel)
+
+        precioLabel.font = .systemFont(ofSize: 11)
         precioLabel.textColor = AppColors.textSecondary
         precioLabel.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(precioLabel)
 
-        subtotalLabel.font          = .systemFont(ofSize: 15, weight: .bold)
-        subtotalLabel.textColor     = AppColors.accent
+        // Stepper: - | cantidad | +
+        stepperView.backgroundColor = AppColors.background
+        stepperView.layer.cornerRadius = 14
+        stepperView.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(stepperView)
+
+        menosButton.setTitle("−", for: .normal)
+        menosButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
+        menosButton.setTitleColor(AppColors.danger, for: .normal)
+        menosButton.translatesAutoresizingMaskIntoConstraints = false
+        menosButton.addTarget(self, action: #selector(menosTapped), for: .touchUpInside)
+        stepperView.addSubview(menosButton)
+
+        cantidadLabel.font = .systemFont(ofSize: 15, weight: .bold)
+        cantidadLabel.textColor = AppColors.textPrimary
+        cantidadLabel.textAlignment = .center
+        cantidadLabel.translatesAutoresizingMaskIntoConstraints = false
+        stepperView.addSubview(cantidadLabel)
+
+        masButton.setTitle("+", for: .normal)
+        masButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
+        masButton.setTitleColor(AppColors.success, for: .normal)
+        masButton.translatesAutoresizingMaskIntoConstraints = false
+        masButton.addTarget(self, action: #selector(masTapped), for: .touchUpInside)
+        stepperView.addSubview(masButton)
+
+        subtotalLabel.font = .systemFont(ofSize: 15, weight: .bold)
+        subtotalLabel.textColor = AppColors.accent
         subtotalLabel.textAlignment = .right
         subtotalLabel.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(subtotalLabel)
 
-        deleteButton.setTitle("✕", for: .normal)
-        deleteButton.setTitleColor(AppColors.danger, for: .normal)
-        deleteButton.titleLabel?.font = .systemFont(ofSize: 14, weight: .bold)
-        deleteButton.translatesAutoresizingMaskIntoConstraints = false
-        deleteButton.addTarget(self, action: #selector(deleteTapped), for: .touchUpInside)
-        cardView.addSubview(deleteButton)
+        eliminarButton.setTitle("✕", for: .normal)
+        eliminarButton.titleLabel?.font = .systemFont(ofSize: 12, weight: .bold)
+        eliminarButton.setTitleColor(AppColors.danger.withAlphaComponent(0.6), for: .normal)
+        eliminarButton.translatesAutoresizingMaskIntoConstraints = false
+        eliminarButton.addTarget(self, action: #selector(eliminarTapped), for: .touchUpInside)
+        cardView.addSubview(eliminarButton)
 
         NSLayoutConstraint.activate([
             cardView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
@@ -428,34 +548,163 @@ class CarritoCell: UITableViewCell {
             cardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             cardView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4),
 
-            nombreLabel.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 10),
-            nombreLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
-            nombreLabel.trailingAnchor.constraint(equalTo: deleteButton.leadingAnchor, constant: -4),
-
-            cantidadLabel.topAnchor.constraint(equalTo: nombreLabel.bottomAnchor, constant: 2),
-            cantidadLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
+            nombreLabel.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 12),
+            nombreLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 14),
+            nombreLabel.trailingAnchor.constraint(equalTo: eliminarButton.leadingAnchor, constant: -4),
 
             precioLabel.topAnchor.constraint(equalTo: nombreLabel.bottomAnchor, constant: 2),
-            precioLabel.leadingAnchor.constraint(equalTo: cantidadLabel.trailingAnchor, constant: 8),
+            precioLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 14),
+
+            stepperView.centerYAnchor.constraint(equalTo: cardView.centerYAnchor),
+            stepperView.trailingAnchor.constraint(equalTo: subtotalLabel.leadingAnchor, constant: -8),
+            stepperView.widthAnchor.constraint(equalToConstant: 100),
+            stepperView.heightAnchor.constraint(equalToConstant: 28),
+
+            menosButton.leadingAnchor.constraint(equalTo: stepperView.leadingAnchor),
+            menosButton.centerYAnchor.constraint(equalTo: stepperView.centerYAnchor),
+            menosButton.widthAnchor.constraint(equalToConstant: 32),
+            menosButton.heightAnchor.constraint(equalToConstant: 28),
+
+            cantidadLabel.centerXAnchor.constraint(equalTo: stepperView.centerXAnchor),
+            cantidadLabel.centerYAnchor.constraint(equalTo: stepperView.centerYAnchor),
+
+            masButton.trailingAnchor.constraint(equalTo: stepperView.trailingAnchor),
+            masButton.centerYAnchor.constraint(equalTo: stepperView.centerYAnchor),
+            masButton.widthAnchor.constraint(equalToConstant: 32),
+            masButton.heightAnchor.constraint(equalToConstant: 28),
 
             subtotalLabel.centerYAnchor.constraint(equalTo: cardView.centerYAnchor),
             subtotalLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -12),
+            subtotalLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 80),
 
-            deleteButton.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 4),
-            deleteButton.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -4),
-            deleteButton.widthAnchor.constraint(equalToConstant: 28),
-            deleteButton.heightAnchor.constraint(equalToConstant: 28)
+            eliminarButton.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 4),
+            eliminarButton.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -6),
+            eliminarButton.widthAnchor.constraint(equalToConstant: 24),
+            eliminarButton.heightAnchor.constraint(equalToConstant: 24)
         ])
     }
 
     func configure(with item: ItemCarrito) {
-        nombreLabel.text   = item.producto.nombre ?? ""
-        cantidadLabel.text = "x\(item.cantidad)"
-        precioLabel.text   = "S/ \(String(format: "%.2f", item.precioUnitario))"
+        nombreLabel.text = item.producto.nombre ?? ""
+        precioLabel.text = "S/ \(String(format: "%.2f", item.precioUnitario)) c/u"
+        cantidadLabel.text = "\(item.cantidad)"
         subtotalLabel.text = "S/ \(String(format: "%.2f", item.subtotal))"
     }
 
-    @objc private func deleteTapped() {
-        onDelete?()
+    @objc private func masTapped() { onMas?() }
+    @objc private func menosTapped() { onMenos?() }
+    @objc private func eliminarTapped() { onEliminar?() }
+}
+
+// MARK: - TotalFooter
+class TotalFooter: UITableViewHeaderFooterView {
+    static let id = "TotalFooter"
+
+    private let cardView = UIView()
+    private let subtotalLabel = UILabel()
+    private let igvLabel = UILabel()
+    private let totalLabel = UILabel()
+    private let registrarButton = UIButton()
+    private let cancelarButton = UIButton()
+
+    var onRegistrar: (() -> Void)?
+    var onCancelar: (() -> Void)?
+
+    override init(reuseIdentifier: String?) {
+        super.init(reuseIdentifier: reuseIdentifier)
+        setupUI()
     }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    private func setupUI() {
+        cardView.backgroundColor = AppColors.surface
+        cardView.layer.cornerRadius = 16
+        cardView.layer.shadowColor = UIColor.black.cgColor
+        cardView.layer.shadowOpacity = 0.08
+        cardView.layer.shadowOffset = CGSize(width: 0, height: -2)
+        cardView.layer.shadowRadius = 8
+        cardView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(cardView)
+
+        let titleLbl = UILabel()
+        titleLbl.text = "RESUMEN"
+        titleLbl.font = .systemFont(ofSize: 11, weight: .bold)
+        titleLbl.textColor = AppColors.textSecondary
+        titleLbl.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(titleLbl)
+
+        let addRow = { (title: String, label: UILabel, color: UIColor, big: Bool) in
+            let t = UILabel()
+            t.text = title
+            t.font = big ? .systemFont(ofSize: 15, weight: .bold) : .systemFont(ofSize: 13)
+            t.textColor = AppColors.textSecondary
+            t.translatesAutoresizingMaskIntoConstraints = false
+            cardView.addSubview(t)
+
+            label.font = big ? .systemFont(ofSize: 20, weight: .bold) : .systemFont(ofSize: 14, weight: .semibold)
+            label.textColor = color
+            label.textAlignment = .right
+            label.translatesAutoresizingMaskIntoConstraints = false
+            cardView.addSubview(label)
+
+            return (t, label)
+        }
+
+        let (_, _) = addRow("Subtotal", subtotalLabel, AppColors.textPrimary, false)
+        let (_, _) = addRow("IGV (18%)", igvLabel, AppColors.warning, false)
+        let (_, _) = addRow("Total", totalLabel, AppColors.success, true)
+
+        registrarButton.setTitle("Registrar Venta", for: .normal)
+        registrarButton.backgroundColor = AppColors.primary
+        registrarButton.setTitleColor(.white, for: .normal)
+        registrarButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+        registrarButton.layer.cornerRadius = 14
+        registrarButton.translatesAutoresizingMaskIntoConstraints = false
+        registrarButton.addTarget(self, action: #selector(registrarTapped), for: .touchUpInside)
+        cardView.addSubview(registrarButton)
+
+        cancelarButton.setTitle("Cancelar", for: .normal)
+        cancelarButton.setTitleColor(AppColors.danger, for: .normal)
+        cancelarButton.titleLabel?.font = .systemFont(ofSize: 14)
+        cancelarButton.translatesAutoresizingMaskIntoConstraints = false
+        cancelarButton.addTarget(self, action: #selector(cancelarTapped), for: .touchUpInside)
+        cardView.addSubview(cancelarButton)
+
+        NSLayoutConstraint.activate([
+            cardView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            cardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            cardView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+
+            titleLbl.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 14),
+            titleLbl.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 16),
+
+            subtotalLabel.topAnchor.constraint(equalTo: titleLbl.bottomAnchor, constant: 14),
+            subtotalLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
+            subtotalLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 100),
+            igvLabel.topAnchor.constraint(equalTo: subtotalLabel.bottomAnchor, constant: 8),
+            igvLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
+            totalLabel.topAnchor.constraint(equalTo: igvLabel.bottomAnchor, constant: 10),
+            totalLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
+
+            registrarButton.topAnchor.constraint(equalTo: totalLabel.bottomAnchor, constant: 16),
+            registrarButton.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 16),
+            registrarButton.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
+            registrarButton.heightAnchor.constraint(equalToConstant: 50),
+
+            cancelarButton.topAnchor.constraint(equalTo: registrarButton.bottomAnchor, constant: 8),
+            cancelarButton.centerXAnchor.constraint(equalTo: cardView.centerXAnchor),
+            cancelarButton.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -12)
+        ])
+    }
+
+    func configure(subtotal: Double, igv: Double, total: Double) {
+        subtotalLabel.text = "S/ \(String(format: "%.2f", subtotal))"
+        igvLabel.text = "S/ \(String(format: "%.2f", igv))"
+        totalLabel.text = "S/ \(String(format: "%.2f", total))"
+    }
+
+    @objc private func registrarTapped() { onRegistrar?() }
+    @objc private func cancelarTapped() { onCancelar?() }
 }

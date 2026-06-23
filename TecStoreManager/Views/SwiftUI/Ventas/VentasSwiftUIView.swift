@@ -169,19 +169,24 @@ private struct VentaCard: View {
     }
 }
 
-// MARK: - Formulario SwiftUI multi-producto
+// MARK: - Formulario SwiftUI multi-producto (Market UX)
 struct VentaFormSwiftUIView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var vm:     VentaViewModel
     @StateObject private var clienteVM  = ClienteViewModel()
     @StateObject private var productoVM = ProductoViewModel()
+    @State private var searchTexto = ""
 
     @State private var clienteIdx    = 0
     @State private var itemsCarrito: [(producto: Producto, cantidad: Int)] = []
     @State private var error        = ""
 
     private var activeClientes:  [Cliente]  { clienteVM.clientes.filter  { $0.estado } }
-    private var activeProductos: [Producto] { productoVM.productos.filter { $0.estado && $0.stock > 0 } }
+    private var activeProductos: [Producto] {
+        let base = productoVM.productos.filter { $0.estado }
+        if searchTexto.isEmpty { return base }
+        return base.filter { ($0.nombre ?? "").localizedCaseInsensitiveContains(searchTexto) }
+    }
 
     private var preview: (subtotal: Double, igv: Double, total: Double) {
         vm.calcularPreview(productos: itemsCarrito)
@@ -190,272 +195,371 @@ struct VentaFormSwiftUIView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AmbientGlowBackground(firstColor: Color(hex: "#059669"), secondColor: Color(hex: "#6366F1"))
-                    .ignoresSafeArea()
+                Color(hex: "#F5F5F0").ignoresSafeArea()
 
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
-                        VStack(spacing: 12) {
-                            ZStack {
-                                PolygonShape(sides: 6)
-                                    .fill(NPGradient.ventas.gradient)
-                                    .frame(width: 80, height: 80)
-                                Image(systemName: "cart.badge.plus")
-                                    .font(.system(size: 34, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
-                            .shadow(color: Color(hex: "#059669").opacity(0.3), radius: 12)
-                            .padding(.top, 24)
-                        }
-
-                        VStack(spacing: 20) {
-                            Text("Nueva Venta")
-                                .font(.system(size: 20, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-
-                            pickerSection(label: "Cliente", icon: "person.fill") {
-                                if activeClientes.isEmpty {
-                                    Text("No hay clientes activos").foregroundColor(.npDanger).font(.caption)
-                                } else {
-                                    Picker("Cliente", selection: $clienteIdx) {
-                                        ForEach(activeClientes.indices, id: \.self) { i in
-                                            Text("\(activeClientes[i].nombres ?? "") \(activeClientes[i].apellidos ?? "")").tag(i)
-                                        }
-                                    }
-                                    .pickerStyle(.menu)
-                                    .pickerBackground()
-                                }
-                            }
-
-                            // Carrito de productos
-                            VStack(alignment: .leading, spacing: 8) {
-                                Label("Productos", systemImage: "shippingbox.fill")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundColor(Color.white.opacity(0.6))
-
-                                if itemsCarrito.isEmpty {
-                                    Text("No hay productos agregados")
-                                        .font(.caption)
-                                        .foregroundColor(Color.white.opacity(0.4))
-                                        .padding(12)
-                                        .frame(maxWidth: .infinity)
-                                        .background(Color.white.opacity(0.06))
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                } else {
-                                    ForEach(itemsCarrito.indices, id: \.self) { i in
-                                        HStack {
-                                            VStack(alignment: .leading, spacing: 2) {
-                                                Text(itemsCarrito[i].producto.nombre ?? "")
-                                                    .font(.system(size: 14, weight: .semibold))
-                                                    .foregroundColor(.white)
-                                                Text("x\(itemsCarrito[i].cantidad) · S/ \(String(format: "%.2f", itemsCarrito[i].producto.precio)) c/u")
-                                                    .font(.system(size: 12))
-                                                    .foregroundColor(Color.white.opacity(0.5))
-                                            }
-                                            Spacer()
-                                            Text("S/ \(String(format: "%.2f", Double(itemsCarrito[i].cantidad) * itemsCarrito[i].producto.precio))")
-                                                .font(.system(size: 14, weight: .bold))
-                                                .foregroundColor(.npEmerald)
-                                            Button {
-                                                itemsCarrito.remove(at: i)
-                                            } label: {
-                                                Image(systemName: "xmark.circle.fill")
-                                                    .foregroundColor(.npDanger)
-                                                    .font(.system(size: 18))
-                                            }
-                                            .padding(.leading, 8)
-                                        }
-                                        .padding(12)
-                                        .background(Color.white.opacity(0.06))
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    }
-                                }
-
-                                Button {
-                                    seleccionarProducto()
-                                } label: {
-                                    Label("Agregar Producto", systemImage: "plus.circle")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundColor(.npEmerald)
-                                        .padding(10)
-                                        .frame(maxWidth: .infinity)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(Color.npEmerald.opacity(0.5), lineWidth: 1)
-                                        )
-                                }
-                            }
-
-                            if !itemsCarrito.isEmpty {
-                                pricePreview
-                            }
-
-                            NPErrorBanner(message: error)
-
-                            Button {
-                                guard !activeClientes.isEmpty else {
-                                    error = "Selecciona un cliente"; return
-                                }
-                                guard !itemsCarrito.isEmpty else {
-                                    error = "Agrega al menos un producto"; return
-                                }
-                                if vm.crear(cliente: activeClientes[clienteIdx], productos: itemsCarrito) {
-                                    dismiss()
-                                } else { error = vm.errorMessage }
-                            } label: {
-                                Text("Registrar venta (\(itemsCarrito.count) producto\(itemsCarrito.count != 1 ? "s" : ""))")
-                                    .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 14)
-                            }
-                            .background(
-                                LinearGradient(
-                                    colors: [Color(hex: "#059669"), Color(hex: "#047857")],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .shadow(color: Color(hex: "#059669").opacity(0.3), radius: 8, x: 0, y: 4)
-                        }
-                        .padding(24)
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(24)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 24)
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [.white.opacity(0.2), .white.opacity(0.05)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 1.5
-                                )
-                        )
-                        .shadow(color: Color.black.opacity(0.3), radius: 24, x: 0, y: 12)
+                VStack(spacing: 0) {
+                    // Header
+                    HStack {
+                        Button("Cancelar") { dismiss() }
+                            .foregroundColor(Color(hex: "#F43F5E"))
+                            .font(.system(size: 15, weight: .semibold))
+                        Spacer()
+                        Text("Nueva Venta")
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundColor(Color(hex: "#292524"))
+                        Spacer()
+                        Button("Hecho") { registrar() }
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(itemsCarrito.isEmpty ? Color(hex: "#78716C") : Color(hex: "#059669"))
+                            .disabled(itemsCarrito.isEmpty)
                     }
                     .padding(.horizontal, 18)
-                    .padding(.bottom, 30)
+                    .padding(.vertical, 12)
+                    .background(Color.white)
+
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            // Cliente
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("CLIENTE".uppercased())
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundColor(Color(hex: "#78716C"))
+                                    .padding(.horizontal, 18)
+                                    .padding(.top, 14)
+
+                                if activeClientes.isEmpty {
+                                    Text("No hay clientes activos")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(Color(hex: "#EF4444"))
+                                        .padding(.horizontal, 18)
+                                } else {
+                                    Menu {
+                                        ForEach(activeClientes.indices, id: \.self) { i in
+                                            Button("\(activeClientes[i].nombres ?? "") \(activeClientes[i].apellidos ?? "")") {
+                                                clienteIdx = i
+                                            }
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Image(systemName: "person.fill")
+                                                .foregroundColor(Color(hex: "#6366F1"))
+                                                .font(.system(size: 14))
+                                            Text(activeClientes.isEmpty ? "Seleccionar" : "\(activeClientes[clienteIdx].nombres ?? "") \(activeClientes[clienteIdx].apellidos ?? "")")
+                                                .font(.system(size: 15))
+                                                .foregroundColor(Color(hex: "#292524"))
+                                            Spacer()
+                                            Image(systemName: "chevron.down")
+                                                .font(.system(size: 12))
+                                                .foregroundColor(Color(hex: "#78716C"))
+                                        }
+                                        .padding(14)
+                                        .background(Color.white)
+                                        .cornerRadius(12)
+                                        .shadow(color: Color.black.opacity(0.04), radius: 4)
+                                        .padding(.horizontal, 14)
+                                    }
+                                }
+                            }
+                            .padding(.bottom, 10)
+
+                            // Productos
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text("PRODUCTOS".uppercased())
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundColor(Color(hex: "#78716C"))
+                                    .padding(.horizontal, 18)
+                                    .padding(.vertical, 10)
+
+                                // Search
+                                HStack {
+                                    Image(systemName: "magnifyingglass")
+                                        .foregroundColor(Color(hex: "#78716C"))
+                                        .font(.system(size: 14))
+                                    TextField("Buscar producto...", text: $searchTexto)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(Color(hex: "#292524"))
+                                    if !searchTexto.isEmpty {
+                                        Button { searchTexto = "" } label: {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundColor(Color(hex: "#78716C"))
+                                        }
+                                    }
+                                }
+                                .padding(10)
+                                .background(Color(hex: "#FFFFFF"))
+                                .cornerRadius(10)
+                                .padding(.horizontal, 14)
+                                .padding(.bottom, 8)
+
+                                if activeProductos.isEmpty {
+                                    VStack(spacing: 6) {
+                                        Image(systemName: "shippingbox")
+                                            .font(.system(size: 28))
+                                            .foregroundColor(Color(hex: "#78716C").opacity(0.4))
+                                        Text(searchTexto.isEmpty ? "No hay productos disponibles" : "Sin resultados para \"\(searchTexto)\"")
+                                            .font(.system(size: 13))
+                                            .foregroundColor(Color(hex: "#78716C"))
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 30)
+                                } else {
+                                    LazyVStack(spacing: 6) {
+                                        ForEach(activeProductos.indices, id: \.self) { i in
+                                            productRow(activeProductos[i])
+                                        }
+                                    }
+                                    .padding(.horizontal, 14)
+                                }
+                            }
+
+                            // Carrito
+                            VStack(alignment: .leading, spacing: 0) {
+                                let totalItems = itemsCarrito.reduce(0) { $0 + $1.cantidad }
+                                HStack {
+                                    Text("CARRITO\(totalItems > 0 ? " (\(totalItems) item\(totalItems != 1 ? "s" : ""))" : "")".uppercased())
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(totalItems > 0 ? Color(hex: "#059669") : Color(hex: "#78716C"))
+                                    Spacer()
+                                    if totalItems > 0 {
+                                        Text(formatCurrency(itemsCarrito.reduce(0.0) { $0 + Double($1.cantidad) * $1.producto.precio }))
+                                            .font(.system(size: 13, weight: .bold))
+                                            .foregroundColor(Color(hex: "#059669"))
+                                    }
+                                }
+                                .padding(.horizontal, 18)
+                                .padding(.top, 14)
+                                .padding(.bottom, 6)
+
+                                if itemsCarrito.isEmpty {
+                                    HStack {
+                                        Spacer()
+                                        Text("Toca \"AGREGAR\" en los productos de arriba 🛒")
+                                            .font(.system(size: 13))
+                                            .foregroundColor(Color(hex: "#78716C"))
+                                            .padding(.vertical, 20)
+                                        Spacer()
+                                    }
+                                } else {
+                                    LazyVStack(spacing: 6) {
+                                        ForEach(itemsCarrito.indices, id: \.self) { i in
+                                            cartItemRow(i)
+                                        }
+                                    }
+                                    .padding(.horizontal, 14)
+                                    .padding(.bottom, 6)
+                                }
+                            }
+                            .background(Color(hex: "#F0FDF4").opacity(0.5))
+
+                            // Totales & Botón
+                            if !itemsCarrito.isEmpty {
+                                VStack(spacing: 0) {
+                                    VStack(spacing: 8) {
+                                        totalRow("Subtotal", formatCurrency(preview.subtotal), Color(hex: "#292524"))
+                                        Divider().padding(.horizontal, 4)
+                                        totalRow("IGV (18%)", formatCurrency(preview.igv), Color(hex: "#F59E0B"))
+                                        Divider().padding(.horizontal, 4)
+                                        totalRow("TOTAL", formatCurrency(preview.total), Color(hex: "#059669"))
+                                    }
+                                    .padding(16)
+                                    .background(Color.white)
+                                    .cornerRadius(14)
+                                    .shadow(color: Color.black.opacity(0.04), radius: 4)
+
+                                    Button(action: registrar) {
+                                        Text("Registrar Venta")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 16)
+                                            .background(Color(hex: "#F43F5E"))
+                                            .cornerRadius(14)
+                                    }
+                                    .padding(.top, 14)
+                                }
+                                .padding(.horizontal, 18)
+                                .padding(.vertical, 14)
+                            }
+
+                            if !error.isEmpty {
+                                Text(error)
+                                    .font(.system(size: 13))
+                                    .foregroundColor(Color(hex: "#EF4444"))
+                                    .padding(.horizontal, 18)
+                                    .padding(.bottom, 10)
+                            }
+                        }
+                    }
                 }
             }
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") { dismiss() }
+            .navigationBarHidden(true)
+        }
+    }
+
+    // MARK: - Product Row
+    private func productRow(_ producto: Producto) -> some View {
+        let enCarrito = itemsCarrito.first { $0.producto.idProducto == producto.idProducto }
+        let cantidad = enCarrito?.cantidad ?? 0
+        let sinStock = producto.stock == 0
+
+        return HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(producto.nombre ?? "")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(Color(hex: "#292524"))
+                Text("S/ \(String(format: "%.2f", producto.precio))")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(Color(hex: "#6366F1"))
+                Text("Stock: \(producto.stock)")
+                    .font(.system(size: 11))
+                    .foregroundColor(producto.stock <= 5 ? Color(hex: "#EF4444") : Color(hex: "#78716C"))
+            }
+
+            Spacer()
+
+            if sinStock {
+                Text("AGOTADO")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color(hex: "#78716C"))
+                    .cornerRadius(12)
+            } else if cantidad > 0 {
+                VStack(spacing: 2) {
+                    Text("\(cantidad)")
+                        .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.white)
+                        .frame(width: 18, height: 18)
+                        .background(Color(hex: "#F43F5E"))
+                        .clipShape(Circle())
+                    Button("+1") {
+                        agregarProducto(producto)
+                    }
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(Color(hex: "#059669"))
+                    .cornerRadius(14)
                 }
+            } else {
+                Button("AGREGAR") {
+                    agregarProducto(producto)
+                }
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color(hex: "#F43F5E"))
+                .cornerRadius(16)
             }
         }
-        .preferredColorScheme(.dark)
+        .padding(12)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.03), radius: 2)
     }
 
-    private func seleccionarProducto() {
-        guard !activeProductos.isEmpty else {
-            error = "No hay productos disponibles"
-            return
-        }
-        // Usamos UIAlertController via UIKit porque SwiftUI picker es muy limitado
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let root = windowScene.windows.first?.rootViewController else { return }
+    // MARK: - Cart Item Row
+    private func cartItemRow(_ index: Int) -> some View {
+        let item = itemsCarrito[index]
+        return HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.producto.nombre ?? "")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Color(hex: "#292524"))
+                Text("S/ \(String(format: "%.2f", item.producto.precio)) c/u")
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(hex: "#78716C"))
+            }
 
-        let alert = UIAlertController(title: "Agregar Producto", message: nil, preferredStyle: .actionSheet)
-        for producto in activeProductos {
-            alert.addAction(UIAlertAction(title: "\(producto.nombre ?? "") - S/ \(String(format: "%.2f", producto.precio)) (Stock: \(producto.stock))", style: .default) { _ in
-                pedirCantidad(producto: producto)
-            })
+            Spacer()
+
+            // Stepper
+            HStack(spacing: 0) {
+                Button {
+                    if item.cantidad > 1 {
+                        itemsCarrito[index].cantidad -= 1
+                    } else {
+                        itemsCarrito.remove(at: index)
+                    }
+                } label: {
+                    Text("−")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(Color(hex: "#EF4444"))
+                        .frame(width: 32, height: 30)
+                }
+                Text("\(item.cantidad)")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(Color(hex: "#292524"))
+                    .frame(minWidth: 28)
+                Button {
+                    if item.cantidad < item.producto.stock {
+                        itemsCarrito[index].cantidad += 1
+                    }
+                } label: {
+                    Text("+")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(Color(hex: "#059669"))
+                        .frame(width: 32, height: 30)
+                }
+            }
+            .background(Color(hex: "#F5F5F0"))
+            .cornerRadius(14)
+
+            Text("S/ \(String(format: "%.2f", Double(item.cantidad) * item.producto.precio))")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(Color(hex: "#6366F1"))
+                .frame(width: 72, alignment: .trailing)
+
+            Button {
+                itemsCarrito.remove(at: index)
+            } label: {
+                Image(systemName: "trash")
+                    .font(.system(size: 12))
+                    .foregroundColor(Color(hex: "#EF4444").opacity(0.6))
+            }
+            .padding(.leading, 2)
         }
-        alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
-        root.present(alert, animated: true)
+        .padding(12)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.03), radius: 2)
     }
 
-    private func pedirCantidad(producto: Producto) {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let root = windowScene.windows.first?.rootViewController else { return }
-
-        let alert = UIAlertController(title: "Cantidad", message: "Producto: \(producto.nombre ?? "")\nStock: \(producto.stock)", preferredStyle: .alert)
-        alert.addTextField { tf in
-            tf.placeholder = "Cantidad"
-            tf.keyboardType = .numberPad
-        }
-        alert.addAction(UIAlertAction(title: "Agregar", style: .default) { _ in
-            let cantidadStr = alert.textFields?.first?.text ?? ""
-            guard let cantidad = Int(cantidadStr), cantidad > 0, cantidad <= producto.stock else {
-                error = "Cantidad inválida o excede el stock"
+    // MARK: - Helpers
+    private func agregarProducto(_ producto: Producto) {
+        guard producto.stock > 0 else { return }
+        if let idx = itemsCarrito.firstIndex(where: { $0.producto.idProducto == producto.idProducto }) {
+            guard itemsCarrito[idx].cantidad < producto.stock else {
+                error = "Stock máximo alcanzado para \(producto.nombre ?? "")"
                 return
             }
-            if let idx = itemsCarrito.firstIndex(where: { $0.producto.idProducto == producto.idProducto }) {
-                let nuevaCant = itemsCarrito[idx].cantidad + cantidad
-                if nuevaCant > producto.stock {
-                    error = "Stock insuficiente para \(producto.nombre ?? "")"
-                    return
-                }
-                itemsCarrito[idx].cantidad = nuevaCant
-            } else {
-                itemsCarrito.append((producto, cantidad))
-            }
-            error = ""
-        })
-        alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
-        root.present(alert, animated: true)
-    }
-
-    @ViewBuilder
-    private func pickerSection<Content: View>(label: String, icon: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label(label, systemImage: icon)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(Color.white.opacity(0.6))
-            content()
+            itemsCarrito[idx].cantidad += 1
+        } else {
+            itemsCarrito.append((producto, 1))
         }
+        error = ""
     }
 
-    private var pricePreview: some View {
-        VStack(spacing: 0) {
-            Text("Resumen de venta")
-                .font(.system(size: 13, weight: .bold)).foregroundColor(Color.white.opacity(0.6))
-                .frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 10)
-            HStack {
-                Text("Subtotal").foregroundColor(Color.white.opacity(0.5))
-                Spacer()
-                Text(formatCurrency(preview.subtotal)).foregroundColor(.white).bold()
-            }
-            Divider()
-                .background(Color.white.opacity(0.12))
-                .padding(.vertical, 8)
-            HStack {
-                Text("IGV (18%)").foregroundColor(Color.white.opacity(0.5))
-                Spacer()
-                Text(formatCurrency(preview.igv)).foregroundColor(.npAmber).bold()
-            }
-            Divider()
-                .background(Color.white.opacity(0.12))
-                .padding(.vertical, 8)
-            HStack {
-                Text("TOTAL").font(.system(size: 15, weight: .bold)).foregroundColor(.white)
-                Spacer()
-                Text(formatCurrency(preview.total))
-                    .font(.system(size: 18, weight: .bold, design: .rounded)).foregroundColor(.npEmerald)
-            }
+    private func registrar() {
+        guard !activeClientes.isEmpty else { error = "Selecciona un cliente"; return }
+        guard !itemsCarrito.isEmpty else { error = "Agrega al menos un producto"; return }
+        if vm.crear(cliente: activeClientes[clienteIdx], productos: itemsCarrito) {
+            dismiss()
+        } else { error = vm.errorMessage }
+    }
+
+    private func totalRow(_ title: String, _ value: String, _ color: Color) -> some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 14))
+                .foregroundColor(Color(hex: "#78716C"))
+            Spacer()
+            Text(value)
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(color)
         }
-        .padding(16)
-        .background(Color.white.opacity(0.06))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.npEmerald.opacity(0.3), lineWidth: 1))
-    }
-}
-
-private extension View {
-    func pickerBackground() -> some View {
-        self
-            .tint(.white)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12)
-            .background(Color.white.opacity(0.06))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.12), lineWidth: 1))
     }
 }
