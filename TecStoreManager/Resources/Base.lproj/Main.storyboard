@@ -529,16 +529,6 @@
                     </view>
                     <navigationItem key="navigationItem" id="4FS-R9-5gs"/>
                     <connections>
-                        <outlet property="cancelarButton" destination="qk6-Fa-JL7" id="K7D-aV-Ptx"/>
-                        <outlet property="cantidadField" destination="mmC-Vw-Owg" id="DaV-JV-jR1"/>
-                        <outlet property="clienteField" destination="Oro-7o-6ac" id="gGB-Sm-9JA"/>
-                        <outlet property="errorLabel" destination="lRT-2v-O0H" id="kde-yg-a0S"/>
-                        <outlet property="igvLabel" destination="QY4-bp-8c0" id="JIY-ah-9we"/>
-                        <outlet property="precioLabel" destination="COz-9K-tyU" id="2pR-SB-2BQ"/>
-                        <outlet property="productoField" destination="nYh-TM-ECV" id="0Wd-Vt-NdC"/>
-                        <outlet property="registrarButton" destination="ufY-cJ-FnJ" id="byi-gG-bei"/>
-                        <outlet property="subtotalLabel" destination="A78-EU-N10" id="34U-gv-WQA"/>
-                        <outlet property="totalLabel" destination="Y0m-GF-UFd" id="tOo-lI-utn"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bwe-Yz-Qjc" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

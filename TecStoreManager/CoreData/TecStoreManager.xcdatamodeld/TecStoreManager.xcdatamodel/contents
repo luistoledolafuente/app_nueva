@@ -11,6 +11,14 @@
         <attribute name="telefono" optional="YES" attributeType="String"/>
         <relationship name="ventas" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Venta" inverseName="cliente" inverseEntity="Venta"/>
     </entity>
+    <entity name="DetalleVenta" representedClassName="DetalleVenta" syncable="YES" codeGenerationType="class">
+        <attribute name="cantidad" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="idDetalle" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="precioUnitario" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="subtotal" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="producto" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Producto" inverseName="detallesVenta" inverseEntity="Producto"/>
+        <relationship name="venta" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Venta" inverseName="detalles" inverseEntity="Venta"/>
+    </entity>
     <entity name="Producto" representedClassName="Producto" syncable="YES" codeGenerationType="class">
         <attribute name="categoria" optional="YES" attributeType="String"/>
         <attribute name="codigo" optional="YES" attributeType="String"/>
@@ -21,7 +29,7 @@
         <attribute name="nombre" optional="YES" attributeType="String"/>
         <attribute name="precio" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="stock" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
-        <relationship name="ventas" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Venta" inverseName="producto" inverseEntity="Venta"/>
+        <relationship name="detallesVenta" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DetalleVenta" inverseName="producto" inverseEntity="DetalleVenta"/>
     </entity>
     <entity name="Ubicacion" representedClassName="Ubicacion" syncable="YES" codeGenerationType="class">
         <attribute name="direccionReferencia" optional="YES" attributeType="String"/>
@@ -38,15 +46,13 @@
         <attribute name="password" optional="YES" attributeType="String"/>
     </entity>
     <entity name="Venta" representedClassName="Venta" syncable="YES" codeGenerationType="class">
-        <attribute name="cantidad" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="codigoVenta" optional="YES" attributeType="String"/>
         <attribute name="fechaVenta" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="idVenta" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="igv" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="precio" optional="YES" attributeType="Double" usesScalarValueType="YES"/>
         <attribute name="subtotal" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="total" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="cliente" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Cliente" inverseName="ventas" inverseEntity="Cliente"/>
-        <relationship name="producto" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Producto" inverseName="ventas" inverseEntity="Producto"/>
+        <relationship name="detalles" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="DetalleVenta" inverseName="venta" inverseEntity="DetalleVenta"/>
     </entity>
 </model>

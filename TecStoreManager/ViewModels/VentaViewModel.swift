@@ -26,27 +26,24 @@ class VentaViewModel: ObservableObject {
         ventas = repository.obtenerTodas()
     }
     
-    // MARK: - Crear
-    func crear(cantidadStr: String, cliente: Cliente, producto: Producto) -> Bool {
-        guard let cantidad = Int(cantidadStr) else {
-            errorMessage = "La cantidad debe ser un número válido"
+    // MARK: - Crear (multi-producto)
+    func crear(cliente: Cliente, productos: [(producto: Producto, cantidad: Int)]) -> Bool {
+        guard !productos.isEmpty else {
+            errorMessage = "Agrega al menos un producto"
             return false
         }
-        
-        if let error = Validators.validarVenta(
-            cantidad: cantidad,
-            stockActual: Int(producto.stock)
-        ) {
-            errorMessage = error
-            return false
+
+        for item in productos {
+            if let error = Validators.validarVenta(
+                cantidad: item.cantidad,
+                stockActual: Int(item.producto.stock)
+            ) {
+                errorMessage = "\(item.producto.nombre ?? ""): \(error)"
+                return false
+            }
         }
-        
-        repository.crear(
-            cantidad: cantidad,
-            precio: producto.precio,
-            cliente: cliente,
-            producto: producto
-        )
+
+        repository.crear(cliente: cliente, productos: productos)
         cargar()
         errorMessage = ""
         return true
@@ -72,10 +69,9 @@ class VentaViewModel: ObservableObject {
         ventas = repository.buscarPorFecha(desde: fechaDesde, hasta: fechaHasta)
     }
     
-    // MARK: - Calcular preview
-    func calcularPreview(cantidadStr: String, precio: Double) -> (subtotal: Double, igv: Double, total: Double) {
-        let cantidad = Double(cantidadStr) ?? 0
-        let subtotal = cantidad * precio
+    // MARK: - Calcular preview (multi-producto)
+    func calcularPreview(productos: [(producto: Producto, cantidad: Int)]) -> (subtotal: Double, igv: Double, total: Double) {
+        let subtotal = productos.reduce(0.0) { $0 + (Double($1.cantidad) * $1.producto.precio) }
         let igv      = subtotal * AppConstants.igvRate
         let total    = subtotal + igv
         return (subtotal, igv, total)

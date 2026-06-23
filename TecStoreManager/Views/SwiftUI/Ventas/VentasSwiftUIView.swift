@@ -120,6 +120,18 @@ private struct VentaCard: View {
         "\(venta.cliente?.nombres ?? "") \(venta.cliente?.apellidos ?? "")"
     }
 
+    private var productosResumen: String {
+        let detalles = venta.detalles as? Set<DetalleVenta> ?? []
+        let nombres = detalles.compactMap { $0.producto?.nombre }.filter { !$0.isEmpty }
+        if nombres.isEmpty { return "-" }
+        if nombres.count == 1 { return nombres[0] }
+        return "\(nombres[0]) + \(nombres.count - 1) más"
+    }
+
+    private var totalProductos: Int {
+        (venta.detalles as? Set<DetalleVenta>)?.count ?? 0
+    }
+
     var body: some View {
         NPTopCard(color: .npEmerald) {
             HStack(spacing: 14) {
@@ -129,14 +141,14 @@ private struct VentaCard: View {
                         Text(venta.codigoVenta ?? "---")
                             .font(.system(size: 12, weight: .bold, design: .monospaced))
                             .foregroundColor(.npEmerald)
-                        NPBadge(text: "x\(venta.cantidad)", color: .npSecondary)
+                        NPBadge(text: "\(totalProductos) prod.", color: .npSecondary)
                     }
                     Text(clienteName)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.npPrimary)
                     HStack(spacing: 6) {
                         Image(systemName: "shippingbox").font(.caption2).foregroundColor(.npSlate)
-                        Text(venta.producto?.nombre ?? "-")
+                        Text(productosResumen)
                             .font(.system(size: 13)).foregroundColor(.npSlate).lineLimit(1)
                     }
                     HStack(spacing: 6) {
@@ -157,24 +169,22 @@ private struct VentaCard: View {
     }
 }
 
+// MARK: - Formulario SwiftUI multi-producto
 struct VentaFormSwiftUIView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var vm:     VentaViewModel
     @StateObject private var clienteVM  = ClienteViewModel()
     @StateObject private var productoVM = ProductoViewModel()
 
-    @State private var clienteIdx  = 0
-    @State private var productoIdx = 0
-    @State private var cantidad    = ""
-    @State private var error       = ""
+    @State private var clienteIdx    = 0
+    @State private var itemsCarrito: [(producto: Producto, cantidad: Int)] = []
+    @State private var error        = ""
 
     private var activeClientes:  [Cliente]  { clienteVM.clientes.filter  { $0.estado } }
-    private var activeProductos: [Producto] { productoVM.productos.filter { $0.estado } }
+    private var activeProductos: [Producto] { productoVM.productos.filter { $0.estado && $0.stock > 0 } }
 
     private var preview: (subtotal: Double, igv: Double, total: Double) {
-        let precio = activeProductos.isEmpty ? 0.0
-            : activeProductos[min(productoIdx, activeProductos.count - 1)].precio
-        return vm.calcularPreview(cantidadStr: cantidad, precio: precio)
+        vm.calcularPreview(productos: itemsCarrito)
     }
 
     var body: some View {
@@ -182,7 +192,7 @@ struct VentaFormSwiftUIView: View {
             ZStack {
                 AmbientGlowBackground(firstColor: Color(hex: "#059669"), secondColor: Color(hex: "#6366F1"))
                     .ignoresSafeArea()
-                
+
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
                         VStack(spacing: 12) {
@@ -218,67 +228,83 @@ struct VentaFormSwiftUIView: View {
                                 }
                             }
 
-                            pickerSection(label: "Producto", icon: "shippingbox.fill") {
-                                if activeProductos.isEmpty {
-                                    Text("No hay productos disponibles").foregroundColor(.npDanger).font(.caption)
+                            // Carrito de productos
+                            VStack(alignment: .leading, spacing: 8) {
+                                Label("Productos", systemImage: "shippingbox.fill")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(Color.white.opacity(0.6))
+
+                                if itemsCarrito.isEmpty {
+                                    Text("No hay productos agregados")
+                                        .font(.caption)
+                                        .foregroundColor(Color.white.opacity(0.4))
+                                        .padding(12)
+                                        .frame(maxWidth: .infinity)
+                                        .background(Color.white.opacity(0.06))
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
                                 } else {
-                                    Picker("Producto", selection: $productoIdx) {
-                                        ForEach(activeProductos.indices, id: \.self) { i in
-                                            Text("\(activeProductos[i].nombre ?? "") · Stock: \(activeProductos[i].stock)").tag(i)
+                                    ForEach(itemsCarrito.indices, id: \.self) { i in
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                Text(itemsCarrito[i].producto.nombre ?? "")
+                                                    .font(.system(size: 14, weight: .semibold))
+                                                    .foregroundColor(.white)
+                                                Text("x\(itemsCarrito[i].cantidad) · S/ \(String(format: "%.2f", itemsCarrito[i].producto.precio)) c/u")
+                                                    .font(.system(size: 12))
+                                                    .foregroundColor(Color.white.opacity(0.5))
+                                            }
+                                            Spacer()
+                                            Text("S/ \(String(format: "%.2f", Double(itemsCarrito[i].cantidad) * itemsCarrito[i].producto.precio))")
+                                                .font(.system(size: 14, weight: .bold))
+                                                .foregroundColor(.npEmerald)
+                                            Button {
+                                                itemsCarrito.remove(at: i)
+                                            } label: {
+                                                Image(systemName: "xmark.circle.fill")
+                                                    .foregroundColor(.npDanger)
+                                                    .font(.system(size: 18))
+                                            }
+                                            .padding(.leading, 8)
                                         }
+                                        .padding(12)
+                                        .background(Color.white.opacity(0.06))
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
                                     }
-                                    .pickerStyle(.menu)
-                                    .pickerBackground()
+                                }
+
+                                Button {
+                                    seleccionarProducto()
+                                } label: {
+                                    Label("Agregar Producto", systemImage: "plus.circle")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.npEmerald)
+                                        .padding(10)
+                                        .frame(maxWidth: .infinity)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color.npEmerald.opacity(0.5), lineWidth: 1)
+                                        )
                                 }
                             }
 
-                            HStack {
-                                Image(systemName: "doc.text.fill")
-                                    .foregroundColor(Color(hex: "#059669"))
-                                    .font(.system(size: 13))
-                                Text("FV-XXXXX")
-                                    .font(.system(size: 13, weight: .bold, design: .monospaced))
-                                    .foregroundColor(Color.white.opacity(0.6))
-                                Text("• Código auto-generado")
-                                    .font(.caption)
-                                    .foregroundColor(Color.white.opacity(0.5))
-                                Spacer()
-                            }
-                            .padding(12)
-                            .background(Color.white.opacity(0.06))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                            )
-
-                            NPField(icon: "number",
-                                    placeholder: "Cantidad",
-                                    text: $cantidad,
-                                    keyboardType: .numberPad,
-                                    accentColor: .npEmerald,
-                                    textColor: .white,
-                                    placeholderColor: Color.white.opacity(0.4),
-                                    bgColor: Color.white.opacity(0.06),
-                                    borderColor: Color.white.opacity(0.12))
-
-                            if !activeProductos.isEmpty && !cantidad.isEmpty {
+                            if !itemsCarrito.isEmpty {
                                 pricePreview
                             }
 
                             NPErrorBanner(message: error)
 
                             Button {
-                                guard !activeClientes.isEmpty, !activeProductos.isEmpty else {
-                                    error = "Selecciona cliente y producto"; return
+                                guard !activeClientes.isEmpty else {
+                                    error = "Selecciona un cliente"; return
                                 }
-                                if vm.crear(cantidadStr: cantidad,
-                                            cliente: activeClientes[clienteIdx],
-                                            producto: activeProductos[productoIdx]) {
+                                guard !itemsCarrito.isEmpty else {
+                                    error = "Agrega al menos un producto"; return
+                                }
+                                if vm.crear(cliente: activeClientes[clienteIdx], productos: itemsCarrito) {
                                     dismiss()
                                 } else { error = vm.errorMessage }
                             } label: {
-                                Text("Registrar venta")
+                                Text("Registrar venta (\(itemsCarrito.count) producto\(itemsCarrito.count != 1 ? "s" : ""))")
                                     .font(.system(size: 15, weight: .bold))
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
@@ -325,6 +351,56 @@ struct VentaFormSwiftUIView: View {
             }
         }
         .preferredColorScheme(.dark)
+    }
+
+    private func seleccionarProducto() {
+        guard !activeProductos.isEmpty else {
+            error = "No hay productos disponibles"
+            return
+        }
+        // Usamos UIAlertController via UIKit porque SwiftUI picker es muy limitado
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let root = windowScene.windows.first?.rootViewController else { return }
+
+        let alert = UIAlertController(title: "Agregar Producto", message: nil, preferredStyle: .actionSheet)
+        for producto in activeProductos {
+            alert.addAction(UIAlertAction(title: "\(producto.nombre ?? "") - S/ \(String(format: "%.2f", producto.precio)) (Stock: \(producto.stock))", style: .default) { _ in
+                pedirCantidad(producto: producto)
+            })
+        }
+        alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
+        root.present(alert, animated: true)
+    }
+
+    private func pedirCantidad(producto: Producto) {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let root = windowScene.windows.first?.rootViewController else { return }
+
+        let alert = UIAlertController(title: "Cantidad", message: "Producto: \(producto.nombre ?? "")\nStock: \(producto.stock)", preferredStyle: .alert)
+        alert.addTextField { tf in
+            tf.placeholder = "Cantidad"
+            tf.keyboardType = .numberPad
+        }
+        alert.addAction(UIAlertAction(title: "Agregar", style: .default) { _ in
+            let cantidadStr = alert.textFields?.first?.text ?? ""
+            guard let cantidad = Int(cantidadStr), cantidad > 0, cantidad <= producto.stock else {
+                error = "Cantidad inválida o excede el stock"
+                return
+            }
+            if let idx = itemsCarrito.firstIndex(where: { $0.producto.idProducto == producto.idProducto }) {
+                let nuevaCant = itemsCarrito[idx].cantidad + cantidad
+                if nuevaCant > producto.stock {
+                    error = "Stock insuficiente para \(producto.nombre ?? "")"
+                    return
+                }
+                itemsCarrito[idx].cantidad = nuevaCant
+            } else {
+                itemsCarrito.append((producto, cantidad))
+            }
+            error = ""
+        })
+        alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
+        root.present(alert, animated: true)
     }
 
     @ViewBuilder

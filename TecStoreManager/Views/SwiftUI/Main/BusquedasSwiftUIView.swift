@@ -221,6 +221,13 @@ private struct SearchClienteRow: View {
 private struct SearchVentaRow: View {
     let venta: Venta
     private var clienteName: String { "\(venta.cliente?.nombres ?? "") \(venta.cliente?.apellidos ?? "")" }
+    private var productosResumen: String {
+        let detalles = venta.detalles as? Set<DetalleVenta> ?? []
+        let nombres = detalles.compactMap { $0.producto?.nombre }.filter { !$0.isEmpty }
+        if nombres.isEmpty { return "-" }
+        if nombres.count == 1 { return nombres[0] }
+        return "\(nombres[0]) + \(nombres.count - 1) más"
+    }
     var body: some View {
         NPTopCard(color: .npEmerald) {
             HStack(spacing: 12) {
@@ -230,7 +237,7 @@ private struct SearchVentaRow: View {
                     Text(clienteName)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.npPrimary)
-                    Text(venta.producto?.nombre ?? "-")
+                    Text(productosResumen)
                         .font(.caption)
                         .foregroundColor(.npSlate)
                     Text(formatDate(venta.fechaVenta))

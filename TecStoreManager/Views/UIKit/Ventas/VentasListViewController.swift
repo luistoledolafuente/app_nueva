@@ -247,10 +247,19 @@ class VentaCell: UITableViewCell {
     
     func configure(with venta: Venta) {
         clienteLabel.text  = "\(venta.cliente?.nombres ?? "") \(venta.cliente?.apellidos ?? "")"
-        productoLabel.text = venta.producto?.nombre ?? ""
-        cantidadLabel.text = "Cant: \(venta.cantidad)"
         totalLabel.text    = "S/ \(String(format: "%.2f", venta.total))"
-        
+
+        let detalles = venta.detalles as? Set<DetalleVenta> ?? []
+        let nombres = detalles.compactMap { $0.producto?.nombre ?? "" }
+        if nombres.count == 1 {
+            productoLabel.text = nombres[0]
+        } else if nombres.count > 1 {
+            productoLabel.text = "\(nombres[0]) + \(nombres.count - 1) más"
+        } else {
+            productoLabel.text = "-"
+        }
+        cantidadLabel.text = "\(detalles.count) producto\(detalles.count != 1 ? "s" : "")"
+
         let formatter = DateFormatter()
         formatter.dateFormat = "dd/MM/yyyy"
         fechaLabel.text = formatter.string(from: venta.fechaVenta ?? Date())
