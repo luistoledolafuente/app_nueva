@@ -2,20 +2,23 @@ import SwiftUI
 
 // MARK: - Ambient Glow Background (Neon Lights)
 struct AmbientGlowBackground: View {
+    var firstColor: Color = Color(hex: "#10B981")
+    var secondColor: Color = Color(hex: "#6366F1")
+
     var body: some View {
         ZStack {
             Color(hex: "#090D1A").ignoresSafeArea()
             
             // Neon Green/Emerald Glow (Top-Left)
             Circle()
-                .fill(Color(hex: "#10B981").opacity(0.14))
+                .fill(firstColor.opacity(0.14))
                 .frame(width: 320, height: 320)
                 .blur(radius: 80)
                 .offset(x: -120, y: -220)
             
             // Cobalt Indigo Glow (Bottom-Right)
             Circle()
-                .fill(Color(hex: "#6366F1").opacity(0.14))
+                .fill(secondColor.opacity(0.14))
                 .frame(width: 320, height: 320)
                 .blur(radius: 80)
                 .offset(x: 120, y: 220)

@@ -182,129 +182,215 @@ struct ClienteFormSwiftUIView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.npBg.ignoresSafeArea()
-                VStack(spacing: 0) {
-                    LinearGradient(
-                        colors: [Color.npIndigo, Color(hex: "#4338CA")],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .frame(height: 6)
+                AmbientGlowBackground(firstColor: Color(hex: "#6366F1"), secondColor: Color(hex: "#8B5CF6"))
                     .ignoresSafeArea()
-
-                    ScrollView(showsIndicators: false) {
-                        VStack(spacing: 20) {
-                            VStack(spacing: 10) {
-                                NPAvatar(name: fullName.isEmpty ? "?" : fullName, gradient: .clientes)
-                                    .scaleEffect(1.6).frame(width: 80, height: 80)
-                                    .shadow(color: Color.npSecondary.opacity(0.4), radius: 14, x: 0, y: 6)
-                                if !fullName.isEmpty {
-                                    Text(fullName).font(.system(size: 16, weight: .semibold)).foregroundColor(.npPrimary)
-                                }
-                            }
-                            .padding(.top, 14)
-
-                            NPTopCard(color: .npIndigo) {
-                                VStack(spacing: 18) {
-                                    Text(isEditing ? "Editar Cliente" : "Nuevo Cliente")
-                                        .font(.system(size: 18, weight: .bold))
-                                        .foregroundColor(.npPrimary)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                                    HStack(spacing: 8) {
-                                        NPField(icon: "creditcard",  placeholder: "DNI (8 dígitos)", text: $dni, keyboardType: .numberPad)
-                                        if isConsultandoDNI {
-                                            ProgressView()
-                                                .tint(.npIndigo)
-                                        } else if consultaExitosa && dni.count == 8 {
-                                            Image(systemName: "checkmark.circle.fill")
-                                                .foregroundColor(.npSuccess)
-                                                .font(.system(size: 20))
-                                        }
-                                    }
-                                    .onChange(of: dni) { newValue in
-                                        if newValue.count == 8 && !isEditing {
-                                            Task { await consultarDNI() }
-                                        } else {
-                                            consultaExitosa = false
-                                        }
-                                    }
-                                    NPField(icon: "person.fill", placeholder: "Nombres",   text: $nombres)
-                                    NPField(icon: "person.fill", placeholder: "Apellidos", text: $apellidos)
-                                    NPField(icon: "phone.fill",   placeholder: "Teléfono",  text: $telefono, keyboardType: .phonePad)
-                                    NPField(icon: "envelope.fill", placeholder: "Correo",    text: $correo, keyboardType: .emailAddress)
-                                    NPField(icon: "map.fill",      placeholder: "Dirección", text: $direccion)
-
-                                    if isEditing {
-                                        HStack {
-                                            Image(systemName: "circle.fill")
-                                                .foregroundColor(estado ? .npEmerald : .npDanger)
-                                                .font(.system(size: 12))
-                                            Text("Estado: \(estado ? "Activo" : "Inactivo")")
-                                                .font(.system(size: 15, weight: .medium)).foregroundColor(.npPrimary)
-                                            Spacer()
-                                            Toggle("", isOn: $estado).labelsHidden().tint(.npEmerald)
-                                        }
-                                        .padding(14)
-                                        .background(Color(hex: "#FAFAF9"))
-                                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.npBorder, lineWidth: 0.5))
-                                    }
-
-                                    NPErrorBanner(message: error)
-
-                                    Button(isEditing ? "Guardar cambios" : "Registrar cliente") {
-                                        let ok: Bool
-                                        if let c = cliente {
-                                            ok = vm.actualizar(c, dni: dni, nombres: nombres, apellidos: apellidos,
-                                                               telefono: telefono, correo: correo, direccion: direccion, estado: estado)
-                                        } else {
-                                            ok = vm.crear(dni: dni, nombres: nombres, apellidos: apellidos,
-                                                          telefono: telefono, correo: correo, direccion: direccion)
-                                        }
-                                        if ok { dismiss() } else { error = vm.errorMessage }
-                                    }
-                                    .buttonStyle(NPWPButtonStyle(color: .npIndigo))
-
-                                    if isEditing, let c = cliente {
-                                        Button {
-                                            showDeleteAlert = true
-                                        } label: {
-                                            HStack(spacing: 8) {
-                                                Image(systemName: "trash")
-                                                Text("Eliminar cliente")
-                                            }
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundColor(.npDanger)
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, 14)
-                                            .background(Color.npDanger.opacity(0.06))
-                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.npDanger.opacity(0.2), lineWidth: 0.5))
-                                        }
-                                        .alert("Eliminar cliente", isPresented: $showDeleteAlert) {
-                                            Button("Eliminar", role: .destructive) {
-                                                vm.eliminar(c)
-                                                dismiss()
-                                            }
-                                            Button("Cancelar", role: .cancel) {}
-                                        } message: {
-                                            Text("¿Estás seguro de que deseas eliminar a \"\(c.nombres ?? "") \(c.apellidos ?? "")\"? Esta acción no se puede deshacer.")
-                                        }
-                                    }
-                                }
-                                .padding(20)
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        VStack(spacing: 12) {
+                            NPAvatar(name: fullName.isEmpty ? "?" : fullName, gradient: .clientes)
+                                .scaleEffect(1.6)
+                                .frame(width: 80, height: 80)
+                                .shadow(color: Color(hex: "#6366F1").opacity(0.3), radius: 12)
+                            
+                            if !fullName.isEmpty {
+                                Text(fullName)
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
                             }
                         }
-                        .padding(.horizontal, 18).padding(.bottom, 30)
+                        .padding(.top, 24)
+
+                        VStack(spacing: 20) {
+                            Text(isEditing ? "Editar Cliente" : "Nuevo Cliente")
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+
+                            HStack(spacing: 8) {
+                                NPField(icon: "creditcard",
+                                        placeholder: "DNI (8 dígitos)",
+                                        text: $dni,
+                                        keyboardType: .numberPad,
+                                        accentColor: .npIndigo,
+                                        textColor: .white,
+                                        placeholderColor: Color.white.opacity(0.4),
+                                        bgColor: Color.white.opacity(0.06),
+                                        borderColor: Color.white.opacity(0.12))
+                                
+                                if isConsultandoDNI {
+                                    ProgressView()
+                                        .tint(.white)
+                                } else if consultaExitosa && dni.count == 8 {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(Color(hex: "#10B981"))
+                                        .font(.system(size: 20))
+                                }
+                            }
+                            .onChange(of: dni) { newValue in
+                                if newValue.count == 8 && !isEditing {
+                                    Task { await consultarDNI() }
+                                } else {
+                                    consultaExitosa = false
+                                }
+                            }
+
+                            NPField(icon: "person.fill",
+                                    placeholder: "Nombres",
+                                    text: $nombres,
+                                    accentColor: .npIndigo,
+                                    textColor: .white,
+                                    placeholderColor: Color.white.opacity(0.4),
+                                    bgColor: Color.white.opacity(0.06),
+                                    borderColor: Color.white.opacity(0.12))
+
+                            NPField(icon: "person.fill",
+                                    placeholder: "Apellidos",
+                                    text: $apellidos,
+                                    accentColor: .npIndigo,
+                                    textColor: .white,
+                                    placeholderColor: Color.white.opacity(0.4),
+                                    bgColor: Color.white.opacity(0.06),
+                                    borderColor: Color.white.opacity(0.12))
+
+                            NPField(icon: "phone.fill",
+                                    placeholder: "Teléfono",
+                                    text: $telefono,
+                                    keyboardType: .phonePad,
+                                    accentColor: .npIndigo,
+                                    textColor: .white,
+                                    placeholderColor: Color.white.opacity(0.4),
+                                    bgColor: Color.white.opacity(0.06),
+                                    borderColor: Color.white.opacity(0.12))
+
+                            NPField(icon: "envelope.fill",
+                                    placeholder: "Correo",
+                                    text: $correo,
+                                    keyboardType: .emailAddress,
+                                    accentColor: .npIndigo,
+                                    textColor: .white,
+                                    placeholderColor: Color.white.opacity(0.4),
+                                    bgColor: Color.white.opacity(0.06),
+                                    borderColor: Color.white.opacity(0.12))
+
+                            NPField(icon: "map.fill",
+                                    placeholder: "Dirección",
+                                    text: $direccion,
+                                    accentColor: .npIndigo,
+                                    textColor: .white,
+                                    placeholderColor: Color.white.opacity(0.4),
+                                    bgColor: Color.white.opacity(0.06),
+                                    borderColor: Color.white.opacity(0.12))
+
+                            if isEditing {
+                                HStack {
+                                    Image(systemName: "circle.fill")
+                                        .foregroundColor(estado ? .npEmerald : .npDanger)
+                                        .font(.system(size: 10))
+                                    Text("Estado: \(estado ? "Activo" : "Inactivo")")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundColor(.white)
+                                    Spacer()
+                                    Toggle("", isOn: $estado)
+                                        .labelsHidden()
+                                        .tint(Color(hex: "#10B981"))
+                                }
+                                .padding(14)
+                                .background(Color.white.opacity(0.06))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                                )
+                            }
+
+                            NPErrorBanner(message: error)
+
+                            Button {
+                                let ok: Bool
+                                if let c = cliente {
+                                    ok = vm.actualizar(c, dni: dni, nombres: nombres, apellidos: apellidos,
+                                                       telefono: telefono, correo: correo, direccion: direccion, estado: estado)
+                                } else {
+                                    ok = vm.crear(dni: dni, nombres: nombres, apellidos: apellidos,
+                                                  telefono: telefono, correo: correo, direccion: direccion)
+                                }
+                                if ok { dismiss() } else { error = vm.errorMessage }
+                            } label: {
+                                Text(isEditing ? "Guardar cambios" : "Registrar cliente")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                            }
+                            .background(
+                                LinearGradient(
+                                    colors: [Color(hex: "#6366F1"), Color(hex: "#4F46E5")],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .shadow(color: Color(hex: "#6366F1").opacity(0.3), radius: 8, x: 0, y: 4)
+
+                            if isEditing, let c = cliente {
+                                Button {
+                                    showDeleteAlert = true
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "trash")
+                                        Text("Eliminar cliente")
+                                    }
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundColor(Color(hex: "#EF4444"))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(Color(hex: "#EF4444").opacity(0.1))
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color(hex: "#EF4444").opacity(0.2), lineWidth: 1)
+                                    )
+                                }
+                                .alert("Eliminar cliente", isPresented: $showDeleteAlert) {
+                                    Button("Eliminar", role: .destructive) {
+                                        vm.eliminar(c)
+                                        dismiss()
+                                    }
+                                    Button("Cancelar", role: .cancel) {}
+                                } message: {
+                                    Text("¿Estás seguro de que deseas eliminar a \"\(c.nombres ?? "") \(c.apellidos ?? "")\"? Esta acción no se puede deshacer.")
+                                }
+                            }
+                        }
+                        .padding(24)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(24)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [.white.opacity(0.2), .white.opacity(0.05)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1.5
+                                )
+                        )
+                        .shadow(color: Color.black.opacity(0.3), radius: 24, x: 0, y: 12)
                     }
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 30)
                 }
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }
-                    .foregroundColor(.npPrimary) }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancelar") { dismiss() }
+                        .foregroundColor(.white)
+                }
             }
             .onAppear {
                 guard let c = cliente else { return }

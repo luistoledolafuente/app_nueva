@@ -50,19 +50,16 @@ struct ReportesSwiftUIView: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "doc.richtext")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 15, weight: .bold))
                     Text("Exportar PDF")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 15, weight: .bold))
                 }
-                .foregroundColor(.npPrimary)
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color.white)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.npBorder, lineWidth: 1)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .padding(.vertical, 14)
+                .background(NPGradient.reportes.gradient)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .shadow(color: Color.npAccent.opacity(0.3), radius: 8, x: 0, y: 4)
             }
         }
     }

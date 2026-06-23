@@ -47,6 +47,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="storefront.fill" width="128" height="128"/>
+        <image name="storefront.fill" catalog="system" width="128" height="128"/>
     </resources>
 </document>
