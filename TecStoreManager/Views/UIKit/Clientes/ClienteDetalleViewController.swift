@@ -29,6 +29,10 @@ class ClienteDetalleViewController: UIViewController {
         title = "Detalle Cliente"
         navigationController?.navigationBar.tintColor = AppColors.accent
 
+        let historialBtn = UIBarButtonItem(title: "Compras", style: .plain, target: self, action: #selector(verHistorial))
+        historialBtn.tintColor = AppColors.accent
+        navigationItem.rightBarButtonItem = historialBtn
+
         view.addCard(frame: CGRect(x: 16, y: 123, width: view.frame.width - 32, height: 450))
 
         nombreLabel.font          = .systemFont(ofSize: 22, weight: .bold)
@@ -117,6 +121,13 @@ class ClienteDetalleViewController: UIViewController {
         present(alert, animated: true)
     }
     
+    @objc private func verHistorial() {
+        guard let c = cliente else { return }
+        let listVC = VentasListViewController()
+        listVC.filterClienteId = c.idCliente
+        navigationController?.pushViewController(listVC, animated: true)
+    }
+
     // MARK: - Prepare Segue
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "goToClienteForm" {

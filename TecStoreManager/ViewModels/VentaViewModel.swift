@@ -27,7 +27,7 @@ class VentaViewModel: ObservableObject {
     }
     
     // MARK: - Crear (multi-producto)
-    func crear(cliente: Cliente, productos: [(producto: Producto, cantidad: Int)]) -> Bool {
+    func crear(cliente: Cliente, productos: [(producto: Producto, cantidad: Int)], metodoPago: String = "") -> Bool {
         guard !productos.isEmpty else {
             errorMessage = "Agrega al menos un producto"
             return false
@@ -43,7 +43,7 @@ class VentaViewModel: ObservableObject {
             }
         }
 
-        repository.crear(cliente: cliente, productos: productos)
+        repository.crear(cliente: cliente, productos: productos, metodoPago: metodoPago)
         cargar()
         errorMessage = ""
         return true

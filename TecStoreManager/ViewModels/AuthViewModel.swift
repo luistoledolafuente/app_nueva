@@ -34,6 +34,8 @@ class AuthViewModel: ObservableObject {
         case .success(let usuario):
             usuarioActual = usuario
             estaLogueado = true
+            BiometricAuth.shared.saveCredentials(email: email, password: password)
+            await SyncService.shared.pullAll()
         case .failure(let error):
             errorMessage = error.localizedDescription
         }
@@ -65,6 +67,7 @@ class AuthViewModel: ObservableObject {
         case .success(let usuario):
             usuarioActual = usuario
             estaLogueado = true
+            await SyncService.shared.pullAll()
         case .failure(let error):
             errorMessage = error.localizedDescription
         }
@@ -75,6 +78,7 @@ class AuthViewModel: ObservableObject {
         authService.logout()
         usuarioActual = nil
         estaLogueado = false
+        BiometricAuth.shared.clearCredentials()
     }
 
     static func hashPassword(_ password: String) -> String {

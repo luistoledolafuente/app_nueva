@@ -87,13 +87,13 @@ class FirebaseAuthService {
 
     func checkCurrentSession() -> Usuario? {
         guard let firebaseUser = Auth.auth().currentUser else { return nil }
-        return buscarUsuarioLocal(uid: firebaseUser.uid)
+        return buscarUsuarioLocal(email: firebaseUser.email ?? "")
     }
 
     func addAuthStateListener(handler: @escaping (Usuario?) -> Void) {
         Auth.auth().addStateDidChangeListener { _, firebaseUser in
             if let firebaseUser = firebaseUser {
-                let usuario = self.buscarUsuarioLocal(uid: firebaseUser.uid)
+                let usuario = self.buscarUsuarioLocal(email: firebaseUser.email ?? "")
                 handler(usuario)
             } else {
                 handler(nil)
@@ -102,8 +102,9 @@ class FirebaseAuthService {
     }
 
     private func obtenerOCrearUsuarioLocal(firebaseUser: FirebaseAuth.User, nombreCompleto: String) -> Result<Usuario, Error> {
+        let email = firebaseUser.email ?? ""
         let request: NSFetchRequest<Usuario> = Usuario.fetchRequest()
-        request.predicate = NSPredicate(format: "idUsuario == %@", firebaseUser.uid as NSString)
+        request.predicate = NSPredicate(format: "nombreUsuario == %@", email)
 
         if let existing = try? context.fetch(request).first {
             existing.nombreCompleto = nombreCompleto
@@ -112,8 +113,8 @@ class FirebaseAuthService {
         }
 
         let usuario = Usuario(context: context)
-        usuario.idUsuario      = UUID(uuidString: firebaseUser.uid) ?? UUID()
-        usuario.nombreUsuario  = firebaseUser.email ?? ""
+        usuario.idUsuario      = UUID()
+        usuario.nombreUsuario  = email
         usuario.password       = ""
         usuario.nombreCompleto = nombreCompleto
         usuario.estado         = true
@@ -121,10 +122,10 @@ class FirebaseAuthService {
         return .success(usuario)
     }
 
-    private func buscarUsuarioLocal(uid: String) -> Usuario? {
+    private func buscarUsuarioLocal(email: String) -> Usuario? {
         let request: NSFetchRequest<Usuario> = Usuario.fetchRequest()
-        request.predicate = NSPredicate(format: "idUsuario == %@", uid)
-        return (try? context.fetch(request))?.first
+        request.predicate = NSPredicate(format: "nombreUsuario == %@", email)
+        return try? context.fetch(request).first
     }
 
     #else

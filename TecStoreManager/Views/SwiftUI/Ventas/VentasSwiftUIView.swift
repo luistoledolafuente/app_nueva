@@ -98,12 +98,15 @@ struct VentasSwiftUIView: View {
             ScrollView(showsIndicators: false) {
                 LazyVStack(spacing: 12) {
                     ForEach(displayed, id: \.idVenta) { venta in
-                        VentaCard(venta: venta)
-                            .swipeActions(edge: .trailing) {
-                                Button(role: .destructive) {
-                                    toDelete = venta; showDeleteAlert = true
-                                } label: { Label("Eliminar", systemImage: "trash") }
-                            }
+                        NavigationLink(destination: VentaDetailView(venta: venta)) {
+                            VentaCard(venta: venta)
+                        }
+                        .buttonStyle(.plain)
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                toDelete = venta; showDeleteAlert = true
+                            } label: { Label("Eliminar", systemImage: "trash") }
+                        }
                     }
                 }
                 .padding(.horizontal, 18)
@@ -113,7 +116,7 @@ struct VentasSwiftUIView: View {
     }
 }
 
-private struct VentaCard: View {
+struct VentaCard: View {
     let venta: Venta
 
     private var clienteName: String {
@@ -179,7 +182,8 @@ struct VentaFormSwiftUIView: View {
 
     @State private var clienteIdx    = 0
     @State private var itemsCarrito: [(producto: Producto, cantidad: Int)] = []
-    @State private var error        = ""
+    @State private var metodoPago = "Efectivo"
+    @State private var error      = ""
 
     private var activeClientes:  [Cliente]  { clienteVM.clientes.filter  { $0.estado } }
     private var activeProductos: [Producto] {
@@ -350,6 +354,41 @@ struct VentaFormSwiftUIView: View {
                                 }
                             }
                             .background(Color.npCard.opacity(0.4))
+
+                            // Metodo de pago
+                            if !itemsCarrito.isEmpty {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text("MÉTODO DE PAGO".uppercased())
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(.npSlate)
+                                        .padding(.horizontal, 18)
+
+                                    Menu {
+                                        ForEach(["Efectivo", "Tarjeta", "Yape", "Plin", "Transferencia"], id: \.self) { mp in
+                                            Button(mp) { metodoPago = mp }
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Image(systemName: "creditcard.fill")
+                                                .foregroundColor(.npRose)
+                                                .font(.system(size: 14))
+                                            Text(metodoPago)
+                                                .font(.system(size: 15))
+                                                .foregroundColor(.npPrimary)
+                                            Spacer()
+                                            Image(systemName: "chevron.down")
+                                                .font(.system(size: 12))
+                                                .foregroundColor(.npSlate)
+                                        }
+                                        .padding(14)
+                                        .background(Color.npCard)
+                                        .cornerRadius(12)
+                                        .shadow(color: Color.black.opacity(0.04), radius: 4)
+                                        .padding(.horizontal, 14)
+                                    }
+                                }
+                                .padding(.bottom, 10)
+                            }
 
                             // Totales & Botón
                             if !itemsCarrito.isEmpty {
@@ -547,7 +586,7 @@ struct VentaFormSwiftUIView: View {
     private func registrar() {
         guard !activeClientes.isEmpty else { error = "Selecciona un cliente"; return }
         guard !itemsCarrito.isEmpty else { error = "Agrega al menos un producto"; return }
-        if vm.crear(cliente: activeClientes[clienteIdx], productos: itemsCarrito) {
+        if vm.crear(cliente: activeClientes[clienteIdx], productos: itemsCarrito, metodoPago: metodoPago) {
             dismiss()
         } else { error = vm.errorMessage }
     }

@@ -3,6 +3,7 @@ import CoreData
 class ClienteRepository {
     
     private let context: NSManagedObjectContext
+    private let sync = SyncService.shared
     
     init(context: NSManagedObjectContext = PersistenceController.shared.context) {
         self.context = context
@@ -20,6 +21,7 @@ class ClienteRepository {
         cliente.direccion  = direccion
         cliente.estado     = true
         PersistenceController.shared.save()
+        sync.pushCliente(cliente)
     }
     
     // MARK: - Obtener todos
@@ -27,6 +29,13 @@ class ClienteRepository {
         let request: NSFetchRequest<Cliente> = Cliente.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(key: "nombres", ascending: true)]
         return (try? context.fetch(request)) ?? []
+    }
+    
+    // MARK: - Obtener por ID
+    func obtenerPorId(_ id: UUID) -> Cliente? {
+        let request: NSFetchRequest<Cliente> = Cliente.fetchRequest()
+        request.predicate = NSPredicate(format: "idCliente == %@", id as CVarArg)
+        return try? context.fetch(request).first
     }
     
     // MARK: - Buscar por DNI
@@ -60,10 +69,12 @@ class ClienteRepository {
         cliente.direccion = direccion
         cliente.estado    = estado
         PersistenceController.shared.save()
+        sync.pushCliente(cliente)
     }
     
     // MARK: - Eliminar
     func eliminar(_ cliente: Cliente) {
+        sync.deleteCliente(cliente.idCliente?.uuidString ?? "")
         context.delete(cliente)
         PersistenceController.shared.save()
     }

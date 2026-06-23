@@ -3,6 +3,7 @@ import CoreData
 class VentaRepository {
     
     private let context: NSManagedObjectContext
+    private let sync = SyncService.shared
     
     init(context: NSManagedObjectContext = PersistenceController.shared.context) {
         self.context = context
@@ -20,12 +21,13 @@ class VentaRepository {
     }
 
     // MARK: - Crear (multi-producto)
-    func crear(cliente: Cliente, productos: [(producto: Producto, cantidad: Int)]) {
+    func crear(cliente: Cliente, productos: [(producto: Producto, cantidad: Int)], metodoPago: String = "") {
         let venta = Venta(context: context)
         venta.idVenta     = UUID()
         venta.codigoVenta = generarCodigoVenta()
         venta.fechaVenta  = Date()
         venta.cliente     = cliente
+        venta.metodoPago  = metodoPago
 
         var subtotalTotal: Double = 0
         for item in productos {
@@ -33,12 +35,13 @@ class VentaRepository {
             subtotalTotal += subtotal
 
             let detalle = DetalleVenta(context: context)
-            detalle.idDetalle     = UUID()
-            detalle.cantidad      = Int32(item.cantidad)
+            detalle.idDetalle      = UUID()
+            detalle.cantidad       = Int32(item.cantidad)
             detalle.precioUnitario = item.producto.precio
-            detalle.subtotal      = subtotal
-            detalle.producto      = item.producto
-            detalle.venta         = venta
+            detalle.subtotal       = subtotal
+            detalle.descuento      = 0.0
+            detalle.producto       = item.producto
+            detalle.venta          = venta
 
             item.producto.stock -= Int32(item.cantidad)
 
@@ -56,6 +59,7 @@ class VentaRepository {
         venta.total    = subtotalTotal + venta.igv
 
         PersistenceController.shared.save()
+        sync.pushVenta(venta)
     }
     
     // MARK: - Obtener todas
@@ -63,6 +67,13 @@ class VentaRepository {
         let request: NSFetchRequest<Venta> = Venta.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(key: "fechaVenta", ascending: false)]
         return (try? context.fetch(request)) ?? []
+    }
+    
+    // MARK: - Obtener por ID
+    func obtenerPorId(_ id: UUID) -> Venta? {
+        let request: NSFetchRequest<Venta> = Venta.fetchRequest()
+        request.predicate = NSPredicate(format: "idVenta == %@", id as CVarArg)
+        return try? context.fetch(request).first
     }
     
     // MARK: - Buscar por cliente
@@ -101,6 +112,7 @@ class VentaRepository {
                 }
             }
         }
+        sync.deleteVenta(venta.idVenta?.uuidString ?? "")
         context.delete(venta)
         PersistenceController.shared.save()
     }

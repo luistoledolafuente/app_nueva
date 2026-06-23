@@ -10,7 +10,8 @@ class VentasListViewController: UIViewController {
     @IBOutlet weak var addButton:   UIButton!
     @IBOutlet weak var emptyLabel:  UILabel!
     
-    let viewModel = VentaViewModel()
+    var viewModel = VentaViewModel()
+    var filterClienteId: UUID?
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -22,6 +23,9 @@ class VentasListViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         viewModel.cargar()
+        if let id = filterClienteId {
+            viewModel.ventas = viewModel.ventas.filter { $0.cliente?.idCliente == id }
+        }
         tableView.reloadData()
         updateTotales()
         updateEmptyState()
@@ -146,6 +150,9 @@ extension VentasListViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        let venta = viewModel.ventas[indexPath.row]
+        let detail = VentaDetalleViewController(venta: venta)
+        navigationController?.pushViewController(detail, animated: true)
     }
 }
 

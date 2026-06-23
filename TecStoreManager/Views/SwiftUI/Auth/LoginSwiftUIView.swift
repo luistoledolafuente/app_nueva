@@ -34,6 +34,9 @@ struct LoginSwiftUIView: View {
     @State private var password    = ""
     @State private var showReg     = false
     @State private var contentLoad = false
+    @State private var bioAuthAvailable = false
+
+    private let bio = BiometricAuth.shared
 
     var body: some View {
         ZStack {
@@ -126,6 +129,38 @@ struct LoginSwiftUIView: View {
 
                         MPErrorBanner(message: authVM.errorMessage)
 
+                        if bioAuthAvailable {
+                            Button {
+                                Task {
+                                    guard let creds = bio.getCredentials() else { return }
+                                    if await bio.authenticate() {
+                                        email = creds.email
+                                        password = creds.password
+                                        await authVM.login(email: creds.email, password: creds.password)
+                                    }
+                                }
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: bio.biometryType == .faceID ? "faceid" : "touchid")
+                                        .font(.system(size: 16))
+                                    Text("Acceso rápido")
+                                        .font(.system(size: 15, weight: .bold))
+                                }
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                            }
+                            .background(
+                                LinearGradient(
+                                    colors: [Color(hex: "#6366F1"), Color(hex: "#4F46E5")],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .shadow(color: Color(hex: "#6366F1").opacity(0.3), radius: 8, x: 0, y: 4)
+                        }
+
                         Button {
                             Task { await authVM.login(email: email, password: password) }
                         } label: {
@@ -192,6 +227,7 @@ struct LoginSwiftUIView: View {
         }
         .preferredColorScheme(.dark)
         .onAppear {
+            bioAuthAvailable = bio.isAvailable && bio.getCredentials() != nil
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) { contentLoad = true }
         }
         .sheet(isPresented: $showReg) {

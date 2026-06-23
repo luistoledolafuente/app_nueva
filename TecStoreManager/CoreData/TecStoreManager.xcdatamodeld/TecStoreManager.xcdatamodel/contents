@@ -13,6 +13,7 @@
     </entity>
     <entity name="DetalleVenta" representedClassName="DetalleVenta" syncable="YES" codeGenerationType="class">
         <attribute name="cantidad" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="descuento" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="idDetalle" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="precioUnitario" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="subtotal" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -50,6 +51,7 @@
         <attribute name="fechaVenta" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="idVenta" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="igv" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="metodoPago" optional="YES" attributeType="String"/>
         <attribute name="subtotal" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="total" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="cliente" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Cliente" inverseName="ventas" inverseEntity="Cliente"/>

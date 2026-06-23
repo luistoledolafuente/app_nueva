@@ -9,6 +9,8 @@ struct ProductosSwiftUIView: View {
     @State private var selected: Producto? = nil
     @State private var toDelete: Producto? = nil
     @State private var showDeleteAlert     = false
+    @State private var stockAdjustProd: Producto? = nil
+    @State private var showStockAdjust     = false
 
     private var displayed: [Producto] {
         let base = filterLow
@@ -50,6 +52,16 @@ struct ProductosSwiftUIView: View {
             Text("¿Seguro que deseas eliminar \"\(toDelete?.nombre ?? "")\"?")
         }
         .onAppear { vm.cargar() }
+        .sheet(isPresented: $showStockAdjust) {
+            if let prod = stockAdjustProd {
+                StockAdjustmentView(producto: prod) { nuevaCantidad in
+                    let repo = ProductoRepository()
+                    repo.ajustarStock(prod, nuevaCantidad: nuevaCantidad, motivo: "Ajuste manual")
+                    vm.cargar()
+                }
+                .id(prod.idProducto?.uuidString ?? "adj")
+            }
+        }
     }
 
     private var headerBlock: some View {
@@ -113,6 +125,20 @@ struct ProductosSwiftUIView: View {
                     ForEach(displayed, id: \.idProducto) { producto in
                         ProductoCard(producto: producto)
                             .onTapGesture { selected = producto; showForm = true }
+                            .contextMenu {
+                                Button { selected = producto; showForm = true } label: {
+                                    Label("Editar", systemImage: "pencil")
+                                }
+                                Button { stockAdjustProd = producto; showStockAdjust = true } label: {
+                                    Label("Ajustar Stock", systemImage: "shippingbox")
+                                }
+                                Divider()
+                                Button(role: .destructive) {
+                                    toDelete = producto; showDeleteAlert = true
+                                } label: {
+                                    Label("Eliminar", systemImage: "trash")
+                                }
+                            }
                             .swipeActions(edge: .trailing) {
                                 Button(role: .destructive) {
                                     toDelete = producto

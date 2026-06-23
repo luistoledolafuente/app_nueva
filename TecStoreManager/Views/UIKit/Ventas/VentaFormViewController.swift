@@ -88,6 +88,8 @@ class VentaFormViewController: UIViewController {
         present(alert, animated: true)
     }
 
+    private var metodoPagoSeleccionado = "Efectivo"
+
     @objc private func registrarVenta() {
         guard let cliente = clienteSeleccionado else {
             showError("Selecciona un cliente")
@@ -98,7 +100,7 @@ class VentaFormViewController: UIViewController {
             return
         }
         let prods = itemsCarrito.map { ($0.producto, $0.cantidad) }
-        if viewModel.crear(cliente: cliente, productos: prods) {
+        if viewModel.crear(cliente: cliente, productos: prods, metodoPago: metodoPagoSeleccionado) {
             navigationController?.popViewController(animated: true)
         } else {
             showError(viewModel.errorMessage)
