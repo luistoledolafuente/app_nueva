@@ -118,4 +118,8 @@ class ProductoViewModel: ObservableObject {
         let cats = productos.compactMap { $0.categoria }
         return ["Todos"] + Array(Set(cats)).sorted()
     }
+    
+    func generarCodigoProducto() -> String {
+        return repository.generarCodigoProducto()
+    }
 }

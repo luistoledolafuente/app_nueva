@@ -81,4 +81,21 @@ class ProductoRepository {
         request.fetchLimit = 1
         return try? context.fetch(request).first
     }
+    
+    // MARK: - Generar código de producto
+    func generarCodigoProducto() -> String {
+        let request: NSFetchRequest<Producto> = Producto.fetchRequest()
+        request.predicate = NSPredicate(format: "codigo != nil")
+        request.sortDescriptors = [NSSortDescriptor(key: "codigo", ascending: false)]
+        request.fetchLimit = 1
+        
+        let ultimo = (try? context.fetch(request))?.first?.codigo ?? "PR-00000"
+        let numero: Int
+        if ultimo.hasPrefix("PR-") {
+            numero = Int(ultimo.dropFirst(3)) ?? 0
+        } else {
+            numero = 0
+        }
+        return String(format: "PR-%05d", numero + 1)
+    }
 }

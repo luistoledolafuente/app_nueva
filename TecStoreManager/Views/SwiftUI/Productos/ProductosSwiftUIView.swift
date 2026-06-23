@@ -261,7 +261,22 @@ struct ProductoFormSwiftUIView: View {
                                         .foregroundColor(.npPrimary)
                                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                                    NPField(icon: "barcode", placeholder: "Código", text: $codigo)
+                                     HStack {
+                                         Image(systemName: "barcode")
+                                             .foregroundColor(.npRose)
+                                             .font(.system(size: 14))
+                                             .frame(width: 18)
+                                         Text("Código:")
+                                             .font(.system(size: 15))
+                                             .foregroundColor(.npSlate)
+                                         Text(codigo)
+                                             .font(.system(size: 15, weight: .bold, design: .monospaced))
+                                             .foregroundColor(.npPrimary)
+                                         Spacer()
+                                     }
+                                     .padding(14)
+                                     .background(Color.npBg)
+                                     .clipShape(RoundedRectangle(cornerRadius: 10))
                                     NPField(icon: "tag", placeholder: "Nombre del producto", text: $nombre)
 
                                     ScrollView(.horizontal, showsIndicators: false) {
@@ -396,14 +411,17 @@ struct ProductoFormSwiftUIView: View {
     }
 
     private func loadData() {
-        guard let p = producto else { return }
-        codigo    = p.codigo    ?? ""
-        nombre    = p.nombre    ?? ""
-        categoria = p.categoria ?? "Electronica"
-        precio    = String(p.precio)
-        stock     = String(p.stock)
-        if let path = p.imagenPath, let data = try? Data(contentsOf: imageURL(for: path)) {
-            productImageData = data
+        if let p = producto {
+            codigo    = p.codigo    ?? ""
+            nombre    = p.nombre    ?? ""
+            categoria = p.categoria ?? "Electronica"
+            precio    = String(p.precio)
+            stock     = String(p.stock)
+            if let path = p.imagenPath, let data = try? Data(contentsOf: imageURL(for: path)) {
+                productImageData = data
+            }
+        } else {
+            codigo = vm.generarCodigoProducto()
         }
     }
 
