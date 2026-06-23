@@ -41,6 +41,7 @@ struct ProductosSwiftUIView: View {
         }
         .sheet(isPresented: $showForm, onDismiss: { vm.cargar() }) {
             ProductoFormSwiftUIView(producto: selected, vm: vm)
+                .id(selected?.idProducto ?? "new")
         }
         .alert("Eliminar producto", isPresented: $showDeleteAlert) {
             Button("Eliminar", role: .destructive) { if let p = toDelete { vm.eliminar(p) } }
@@ -459,6 +460,7 @@ struct ProductoFormSwiftUIView: View {
             }
             .onAppear(perform: loadData)
         }
+        .preferredColorScheme(.dark)
     }
 
     private func loadData() {

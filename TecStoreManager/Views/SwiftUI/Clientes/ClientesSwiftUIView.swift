@@ -43,6 +43,7 @@ struct ClientesSwiftUIView: View {
         }
         .sheet(isPresented: $showForm, onDismiss: { vm.cargar() }) {
             ClienteFormSwiftUIView(cliente: selected, vm: vm)
+                .id(selected?.idCliente ?? "new")
         }
         .alert("Eliminar cliente", isPresented: $showDeleteAlert) {
             Button("Eliminar", role: .destructive) { if let c = toDelete { vm.eliminar(c) } }
@@ -399,6 +400,7 @@ struct ClienteFormSwiftUIView: View {
                 estado = c.estado
             }
         }
+        .preferredColorScheme(.dark)
     }
 
     private func consultarDNI() async {

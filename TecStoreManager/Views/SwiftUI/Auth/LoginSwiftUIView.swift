@@ -190,6 +190,7 @@ struct LoginSwiftUIView: View {
                 .padding(.horizontal, 20)
             }
         }
+        .preferredColorScheme(.dark)
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) { contentLoad = true }
         }
@@ -386,5 +387,6 @@ struct RegisterSwiftUIView: View {
                 Text("Tu cuenta fue creada exitosamente. Ya puedes iniciar sesión.")
             }
         }
+        .preferredColorScheme(.dark)
     }
 }

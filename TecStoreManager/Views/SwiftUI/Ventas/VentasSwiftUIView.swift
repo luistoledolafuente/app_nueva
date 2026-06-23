@@ -324,6 +324,7 @@ struct VentaFormSwiftUIView: View {
                 }
             }
         }
+        .preferredColorScheme(.dark)
     }
 
     @ViewBuilder
