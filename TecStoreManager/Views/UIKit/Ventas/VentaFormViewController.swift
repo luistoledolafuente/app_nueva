@@ -634,7 +634,16 @@ class TotalFooter: UITableViewHeaderFooterView {
         titleLbl.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(titleLbl)
 
-        let addRow = { (title: String, label: UILabel, color: UIColor, big: Bool) in
+        let rows = [
+            ("Subtotal", subtotalLabel, AppColors.textPrimary, false),
+            ("IGV (18%)", igvLabel, AppColors.warning, false),
+            ("Total", totalLabel, AppColors.success, true)
+        ]
+
+        var topAnchor = titleLbl.bottomAnchor
+        let topConstant: CGFloat = 14
+
+        for (title, label, color, big) in rows {
             let t = UILabel()
             t.text = title
             t.font = big ? .systemFont(ofSize: 15, weight: .bold) : .systemFont(ofSize: 13)
@@ -648,12 +657,15 @@ class TotalFooter: UITableViewHeaderFooterView {
             label.translatesAutoresizingMaskIntoConstraints = false
             cardView.addSubview(label)
 
-            return (t, label)
-        }
+            t.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 16).isActive = true
+            t.centerYAnchor.constraint(equalTo: label.centerYAnchor).isActive = true
+            label.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16).isActive = true
+            label.widthAnchor.constraint(greaterThanOrEqualToConstant: 100).isActive = true
 
-        let (_, _) = addRow("Subtotal", subtotalLabel, AppColors.textPrimary, false)
-        let (_, _) = addRow("IGV (18%)", igvLabel, AppColors.warning, false)
-        let (_, _) = addRow("Total", totalLabel, AppColors.success, true)
+            t.topAnchor.constraint(equalTo: topAnchor, constant: topConstant).isActive = true
+
+            topAnchor = label.bottomAnchor
+        }
 
         registrarButton.setTitle("Registrar Venta", for: .normal)
         registrarButton.backgroundColor = AppColors.primary
@@ -680,15 +692,7 @@ class TotalFooter: UITableViewHeaderFooterView {
             titleLbl.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 14),
             titleLbl.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 16),
 
-            subtotalLabel.topAnchor.constraint(equalTo: titleLbl.bottomAnchor, constant: 14),
-            subtotalLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
-            subtotalLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 100),
-            igvLabel.topAnchor.constraint(equalTo: subtotalLabel.bottomAnchor, constant: 8),
-            igvLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
-            totalLabel.topAnchor.constraint(equalTo: igvLabel.bottomAnchor, constant: 10),
-            totalLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
-
-            registrarButton.topAnchor.constraint(equalTo: totalLabel.bottomAnchor, constant: 16),
+            registrarButton.topAnchor.constraint(equalTo: topAnchor, constant: 16),
             registrarButton.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 16),
             registrarButton.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
             registrarButton.heightAnchor.constraint(equalToConstant: 50),
