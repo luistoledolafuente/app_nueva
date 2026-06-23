@@ -154,11 +154,14 @@ extension BusquedasViewController: UITableViewDataSource {
             )
         case 2:
             let v = ventaVM.ventas[indexPath.row]
+            let detalles = v.detalles as? Set<DetalleVenta> ?? []
+            let nombres = detalles.compactMap { $0.producto?.nombre }.filter { !$0.isEmpty }
+            let subtitulo = nombres.isEmpty ? "-" : (nombres.count == 1 ? nombres[0] : "\(nombres[0]) + \(nombres.count - 1) más")
             let formatter = DateFormatter()
             formatter.dateFormat = "dd/MM/yyyy"
             cell.configure(
                 titulo:    "\(v.cliente?.nombres ?? "") \(v.cliente?.apellidos ?? "")",
-                subtitulo: v.producto?.nombre ?? "",
+                subtitulo: subtitulo,
                 valor:     "S/ \(String(format: "%.2f", v.total))",
                 badge:     formatter.string(from: v.fechaVenta ?? Date()),
                 badgeColor: AppColors.primary

@@ -22,34 +22,108 @@ class VentaFormViewController: UIViewController {
     // UI elements (programáticos)
     private let scrollView      = UIScrollView()
     private let contentView     = UIView()
+    private let clienteLabel    = UILabel()
     private let clienteField    = UITextField()
+    private let prodLabel       = UILabel()
     private let tableView       = UITableView()
     private let agregarButton   = UIButton()
+    private let cardView        = UIView()
+    private let subtotalTitle   = UILabel()
     private let subtotalLabel   = UILabel()
+    private let igvTitle        = UILabel()
     private let igvLabel        = UILabel()
+    private let totalTitle      = UILabel()
     private let totalLabel      = UILabel()
     private let errorLabel      = UILabel()
     private let registrarButton = UIButton()
     private let cancelarButton  = UIButton()
 
+    private var contentHeightConstraint: NSLayoutConstraint!
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
+        setupViews()
+        setupConstraints()
+        setupActions()
         setupTableView()
         cargarDatos()
+        layoutContenido()
     }
 
-    // MARK: - Setup UI
-    private func setupUI() {
+    // MARK: - Setup inicial (una sola vez)
+    private func setupViews() {
         view.backgroundColor = AppColors.background
         title = "Nueva Venta"
         navigationController?.navigationBar.tintColor = AppColors.accent
 
+        clienteLabel.text = "Cliente"
+        clienteLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        clienteLabel.textColor = AppColors.textSecondary
+
+        setupTextField(clienteField, placeholder: "Seleccionar cliente")
+
+        prodLabel.text = "Productos"
+        prodLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        prodLabel.textColor = AppColors.textSecondary
+
+        agregarButton.setTitle("+ Agregar Producto", for: .normal)
+        agregarButton.backgroundColor    = AppColors.accent
+        agregarButton.setTitleColor(.white, for: .normal)
+        agregarButton.titleLabel?.font   = .systemFont(ofSize: 14, weight: .semibold)
+        agregarButton.layer.cornerRadius = 10
+
+        cardView.backgroundColor = AppColors.surface
+        cardView.layer.cornerRadius = 10
+        cardView.layer.borderWidth = 0.5
+        cardView.layer.borderColor = AppColors.primary.withAlphaComponent(0.15).cgColor
+
+        let titles = ["Subtotal", "IGV (18%)", "Total"]
+        let labels = [subtotalTitle, igvTitle, totalTitle]
+        for (t, l) in zip(titles, labels) {
+            l.text = t
+            l.font = .systemFont(ofSize: 14)
+            l.textColor = AppColors.textSecondary
+        }
+
+        for lbl in [subtotalLabel, igvLabel] {
+            lbl.font = .systemFont(ofSize: 15, weight: .semibold)
+            lbl.textAlignment = .right
+        }
+        subtotalLabel.textColor = AppColors.textPrimary
+        igvLabel.textColor      = AppColors.warning
+
+        totalLabel.font          = .systemFont(ofSize: 20, weight: .bold)
+        totalLabel.textColor     = AppColors.success
+        totalLabel.textAlignment = .right
+
+        subtotalLabel.text = "S/ 0.00"
+        igvLabel.text      = "S/ 0.00"
+        totalLabel.text    = "S/ 0.00"
+
+        errorLabel.textColor     = AppColors.danger
+        errorLabel.font          = .systemFont(ofSize: 13)
+        errorLabel.numberOfLines = 0
+        errorLabel.textAlignment = .center
+
+        registrarButton.setTitle("Registrar Venta", for: .normal)
+        registrarButton.backgroundColor    = AppColors.primary
+        registrarButton.setTitleColor(.white, for: .normal)
+        registrarButton.titleLabel?.font   = .systemFont(ofSize: 16, weight: .semibold)
+        registrarButton.layer.cornerRadius = 12
+
+        cancelarButton.setTitle("Cancelar", for: .normal)
+        cancelarButton.setTitleColor(AppColors.danger, for: .normal)
+        cancelarButton.titleLabel?.font = .systemFont(ofSize: 15)
+    }
+
+    private func setupConstraints() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         contentView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
+
+        contentHeightConstraint = contentView.heightAnchor.constraint(equalToConstant: 800)
 
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -60,119 +134,86 @@ class VentaFormViewController: UIViewController {
             contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            contentHeightConstraint
         ])
+    }
+
+    private func setupActions() {
+        clienteField.addTarget(self, action: #selector(clienteFieldTapped), for: .editingDidBegin)
+        agregarButton.addTarget(self, action: #selector(agregarProductoTapped), for: .touchUpInside)
+        registrarButton.addTarget(self, action: #selector(registrarTapped), for: .touchUpInside)
+        cancelarButton.addTarget(self, action: #selector(cancelarTapped), for: .touchUpInside)
+    }
+
+    // MARK: - Layout dinámico (se llama al iniciar y al cambiar items)
+    private func layoutContenido() {
+        let width = view.frame.width
+
+        // Agregar/remover subvistas de contentView
+        let subviews: [UIView] = [
+            clienteLabel, clienteField,
+            prodLabel, tableView, agregarButton,
+            cardView, errorLabel, registrarButton, cancelarButton
+        ]
+        for sv in subviews {
+            if sv.superview !== contentView { contentView.addSubview(sv) }
+        }
 
         var yOffset: CGFloat = 16
 
-        // Cliente
-        let clienteLabel = UILabel()
-        clienteLabel.text = "Cliente"
-        clienteLabel.font = .systemFont(ofSize: 13, weight: .medium)
-        clienteLabel.textColor = AppColors.textSecondary
-        clienteLabel.frame = CGRect(x: 24, y: yOffset, width: view.frame.width - 48, height: 18)
-        contentView.addSubview(clienteLabel)
+        clienteLabel.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 18)
         yOffset += 24
 
-        setupTextField(clienteField, placeholder: "Seleccionar cliente")
-        clienteField.frame = CGRect(x: 24, y: yOffset, width: view.frame.width - 48, height: 44)
-        clienteField.addTarget(self, action: #selector(clienteFieldTapped), for: .editingDidBegin)
-        contentView.addSubview(clienteField)
+        clienteField.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 44)
         yOffset += 60
 
-        // Productos header
-        let prodLabel = UILabel()
-        prodLabel.text = "Productos"
-        prodLabel.font = .systemFont(ofSize: 13, weight: .medium)
-        prodLabel.textColor = AppColors.textSecondary
-        prodLabel.frame = CGRect(x: 24, y: yOffset, width: view.frame.width - 48, height: 18)
-        contentView.addSubview(prodLabel)
+        prodLabel.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 18)
         yOffset += 24
 
-        // TableView para carrito
-        tableView.frame = CGRect(x: 16, y: yOffset, width: view.frame.width - 32, height: min(CGFloat(itemsCarrito.count) * 84 + 8, 300))
-        tableView.isScrollEnabled = false
-        contentView.addSubview(tableView)
-        yOffset += tableView.frame.height + 8
+        let tableH = min(CGFloat(itemsCarrito.count) * 84 + 8, 300)
+        tableView.frame = CGRect(x: 16, y: yOffset, width: width - 32, height: tableH)
+        yOffset += tableH + 8
 
-        // Botón agregar producto
-        agregarButton.setTitle("+ Agregar Producto", for: .normal)
-        agregarButton.backgroundColor    = AppColors.accent
-        agregarButton.setTitleColor(.white, for: .normal)
-        agregarButton.titleLabel?.font   = .systemFont(ofSize: 14, weight: .semibold)
-        agregarButton.layer.cornerRadius = 10
-        agregarButton.frame = CGRect(x: 24, y: yOffset, width: view.frame.width - 48, height: 40)
-        agregarButton.addTarget(self, action: #selector(agregarProductoTapped), for: .touchUpInside)
-        contentView.addSubview(agregarButton)
+        agregarButton.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 40)
         yOffset += 56
 
-        // Totales
-        let card = UIView(frame: CGRect(x: 16, y: yOffset, width: view.frame.width - 32, height: 140))
-        card.backgroundColor = AppColors.surface
-        card.layer.cornerRadius = 10
-        card.layer.borderWidth = 0.5
-        card.layer.borderColor = AppColors.primary.withAlphaComponent(0.15).cgColor
-        contentView.addSubview(card)
+        cardView.frame = CGRect(x: 16, y: yOffset, width: width - 32, height: 140)
 
-        var cy: CGFloat = 12
-        let addTotalRow = { (title: String, label: UILabel, color: UIColor) in
-            let titleLbl = UILabel()
-            titleLbl.text = title
-            titleLbl.font = .systemFont(ofSize: 14)
-            titleLbl.textColor = AppColors.textSecondary
-            titleLbl.frame = CGRect(x: 16, y: cy, width: 120, height: 22)
-            card.addSubview(titleLbl)
-
-            label.font      = .systemFont(ofSize: 15, weight: .semibold)
-            label.textColor = color
-            label.textAlignment = .right
-            label.frame = CGRect(x: 140, y: cy, width: card.frame.width - 160, height: 22)
-            card.addSubview(label)
-            cy += 30
+        // Layout dentro de cardView
+        let cardSubviews: [UIView] = [
+            subtotalTitle, subtotalLabel,
+            igvTitle, igvLabel,
+            totalTitle, totalLabel
+        ]
+        for sv in cardSubviews {
+            if sv.superview !== cardView { cardView.addSubview(sv) }
         }
 
-        addTotalRow("Subtotal", subtotalLabel, AppColors.textPrimary)
-        addTotalRow("IGV (18%)", igvLabel, AppColors.warning)
-        addTotalRow("Total", totalLabel, AppColors.success)
+        var cy: CGFloat = 12
+        let rowW = cardView.frame.width - 160
 
-        subtotalLabel.text = "S/ 0.00"
-        igvLabel.text      = "S/ 0.00"
-        totalLabel.text    = "S/ 0.00"
-        totalLabel.font    = .systemFont(ofSize: 20, weight: .bold)
+        subtotalTitle.frame = CGRect(x: 16, y: cy, width: 120, height: 22)
+        subtotalLabel.frame = CGRect(x: 140, y: cy, width: rowW, height: 22)
+        cy += 30
+        igvTitle.frame = CGRect(x: 16, y: cy, width: 120, height: 22)
+        igvLabel.frame = CGRect(x: 140, y: cy, width: rowW, height: 22)
+        cy += 30
+        totalTitle.frame = CGRect(x: 16, y: cy, width: 120, height: 22)
+        totalLabel.frame = CGRect(x: 140, y: cy, width: rowW, height: 22)
 
-        yOffset += card.frame.height + 16
+        yOffset += cardView.frame.height + 16
 
-        // Error
-        errorLabel.textColor     = AppColors.danger
-        errorLabel.font          = .systemFont(ofSize: 13)
-        errorLabel.numberOfLines = 0
-        errorLabel.textAlignment = .center
-        errorLabel.frame = CGRect(x: 24, y: yOffset, width: view.frame.width - 48, height: 20)
-        contentView.addSubview(errorLabel)
+        errorLabel.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 20)
         yOffset += 28
 
-        // Registrar
-        registrarButton.setTitle("Registrar Venta", for: .normal)
-        registrarButton.backgroundColor    = AppColors.primary
-        registrarButton.setTitleColor(.white, for: .normal)
-        registrarButton.titleLabel?.font   = .systemFont(ofSize: 16, weight: .semibold)
-        registrarButton.layer.cornerRadius = 12
-        registrarButton.frame = CGRect(x: 24, y: yOffset, width: view.frame.width - 48, height: 50)
-        registrarButton.addTarget(self, action: #selector(registrarTapped), for: .touchUpInside)
-        contentView.addSubview(registrarButton)
+        registrarButton.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 50)
         yOffset += 62
 
-        // Cancelar
-        cancelarButton.setTitle("Cancelar", for: .normal)
-        cancelarButton.setTitleColor(AppColors.danger, for: .normal)
-        cancelarButton.titleLabel?.font = .systemFont(ofSize: 15)
-        cancelarButton.frame = CGRect(x: 24, y: yOffset, width: view.frame.width - 48, height: 40)
-        cancelarButton.addTarget(self, action: #selector(cancelarTapped), for: .touchUpInside)
-        contentView.addSubview(cancelarButton)
+        cancelarButton.frame = CGRect(x: 24, y: yOffset, width: width - 48, height: 40)
         yOffset += 60
 
-        contentView.frame.size.height = yOffset
+        contentHeightConstraint.constant = yOffset
     }
 
     private func setupTextField(_ field: UITextField, placeholder: String) {
@@ -214,37 +255,8 @@ class VentaFormViewController: UIViewController {
         igvLabel.text      = "S/ \(String(format: "%.2f", igv))"
         totalLabel.text    = "S/ \(String(format: "%.2f", total))"
 
-        // Actualizar altura de la tabla
-        let newHeight = min(CGFloat(itemsCarrito.count) * 84 + 8, 300)
-        tableView.frame.size.height = newHeight
-
-        // Re-posicionar elementos después de la tabla
-        rePosicionarElementos()
+        layoutContenido()
         tableView.reloadData()
-    }
-
-    private func rePosicionarElementos() {
-        var yOffset = tableView.frame.minY + tableView.frame.height + 8
-
-        agregarButton.frame.origin.y = yOffset
-        yOffset += 56
-
-        // card de totales
-        guard let card = subtotalLabel.superview else { return }
-        card.frame.origin.y = yOffset
-        yOffset += card.frame.height + 16
-
-        errorLabel.frame.origin.y = yOffset
-        yOffset += 28
-
-        registrarButton.frame.origin.y = yOffset
-        yOffset += 62
-
-        cancelarButton.frame.origin.y = yOffset
-        yOffset += 60
-
-        contentView.frame.size.height = yOffset
-        scrollView.contentSize.height = yOffset
     }
 
     // MARK: - Actions
