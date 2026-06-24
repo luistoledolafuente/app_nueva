@@ -29,10 +29,6 @@ class ProductoDetalleViewController: UIViewController {
         title = "Detalle Producto"
         navigationController?.navigationBar.tintColor = AppColors.accent
 
-        let ajusteBtn = UIBarButtonItem(title: "Ajustar Stock", style: .plain, target: self, action: #selector(ajustarStockTapped))
-        ajusteBtn.tintColor = AppColors.accent
-        navigationItem.rightBarButtonItem = ajusteBtn
-
         view.addCard(frame: CGRect(x: 16, y: 158, width: view.frame.width - 32, height: 394))
 
         nombreLabel.font          = .systemFont(ofSize: 22, weight: .bold)
@@ -111,25 +107,6 @@ class ProductoDetalleViewController: UIViewController {
                 self.navigationController?.popViewController(animated: true)
             }
         })
-        present(alert, animated: true)
-    }
-
-    @objc private func ajustarStockTapped() {
-        guard let p = producto else { return }
-        let alert = UIAlertController(title: "Ajustar Stock", message: "Stock actual: \(p.stock)", preferredStyle: .alert)
-        alert.addTextField { tf in
-            tf.keyboardType = .numberPad
-            tf.text = "\(p.stock)"
-        }
-        alert.addAction(UIAlertAction(title: "Guardar", style: .default) { _ in
-            let texto = alert.textFields?.first?.text ?? ""
-            if let nuevo = Int(texto), nuevo >= 0 {
-                let repo = ProductoRepository()
-                repo.ajustarStock(p, nuevaCantidad: nuevo, motivo: "Ajuste manual")
-                self.cargarDatos()
-            }
-        })
-        alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel))
         present(alert, animated: true)
     }
 }

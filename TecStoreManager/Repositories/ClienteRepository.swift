@@ -3,7 +3,6 @@ import CoreData
 class ClienteRepository {
     
     private let context: NSManagedObjectContext
-    private let sync = SyncService.shared
     
     init(context: NSManagedObjectContext = PersistenceController.shared.context) {
         self.context = context
@@ -21,7 +20,6 @@ class ClienteRepository {
         cliente.direccion  = direccion
         cliente.estado     = true
         PersistenceController.shared.save()
-        sync.pushCliente(cliente)
     }
     
     // MARK: - Obtener todos
@@ -69,12 +67,10 @@ class ClienteRepository {
         cliente.direccion = direccion
         cliente.estado    = estado
         PersistenceController.shared.save()
-        sync.pushCliente(cliente)
     }
     
     // MARK: - Eliminar
     func eliminar(_ cliente: Cliente) {
-        sync.deleteCliente(cliente.idCliente?.uuidString ?? "")
         context.delete(cliente)
         PersistenceController.shared.save()
     }

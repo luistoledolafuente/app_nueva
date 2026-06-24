@@ -16,14 +16,11 @@ class ClienteFormViewController: UIViewController {
     var cliente: Cliente?
     var viewModel = ClienteViewModel()
 
-    private var isConsultandoDNI = false
-
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         cargarDatos()
-        setupDNIListener()
     }
 
     // MARK: - Setup UI
@@ -79,56 +76,6 @@ class ClienteFormViewController: UIViewController {
         telefonoField.text  = c.telefono
         correoField.text    = c.correo
         direccionField.text = c.direccion
-    }
-
-    // MARK: - RENIEC Auto-completar
-    private func setupDNIListener() {
-        dniField.addTarget(self, action: #selector(dniDidChange), for: .editingChanged)
-    }
-
-    @objc private func dniDidChange() {
-        guard cliente == nil else { return }
-        let dni = dniField.text ?? ""
-        if dni.count == 8 {
-            consultarDNI(dni)
-        }
-    }
-
-    private func consultarDNI(_ dni: String) {
-        guard !isConsultandoDNI else { return }
-        isConsultandoDNI = true
-        dniField.isEnabled = false
-
-        let activityIndicator = UIActivityIndicatorView(style: .medium)
-        activityIndicator.color = AppColors.primary
-        dniField.rightView = activityIndicator
-        dniField.rightViewMode = .always
-        activityIndicator.startAnimating()
-
-        Task {
-            do {
-                let data = try await ReniecService.shared.consultarDNI(dni)
-                await MainActor.run {
-                    nombresField.text   = data.nombres.capitalized
-                    apellidosField.text = "\(data.apellidoPaterno.capitalized) \(data.apellidoMaterno.capitalized)".trimmingCharacters(in: .whitespaces)
-                    let checkmark = UIImageView(image: UIImage(systemName: "checkmark.circle.fill"))
-                    checkmark.tintColor = AppColors.success
-                    checkmark.sizeToFit()
-                    dniField.rightView = checkmark
-                    dniField.rightViewMode = .always
-                    errorLabel.text = ""
-                }
-            } catch {
-                await MainActor.run {
-                    errorLabel.text = error.localizedDescription
-                    dniField.rightView = nil
-                }
-            }
-            await MainActor.run {
-                dniField.isEnabled = true
-                isConsultandoDNI = false
-            }
-        }
     }
 
     // MARK: - Actions

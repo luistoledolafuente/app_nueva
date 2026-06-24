@@ -114,22 +114,9 @@ struct ClientesSwiftUIView: View {
             ScrollView(showsIndicators: false) {
                 LazyVStack(spacing: 12) {
                     ForEach(displayed, id: \.idCliente) { cliente in
-                        NavigationLink(destination: ClienteHistoryView(cliente: cliente)) {
-                            ClienteCard(cliente: cliente)
-                        }
-                        .buttonStyle(.plain)
-                        .contextMenu {
-                            Button { selected = cliente; showForm = true } label: {
-                                Label("Editar", systemImage: "pencil")
-                            }
-                            Divider()
-                            Button(role: .destructive) {
-                                toDelete = cliente; showDeleteAlert = true
-                            } label: {
-                                Label("Eliminar", systemImage: "trash")
-                            }
-                        }
-                        .swipeActions(edge: .trailing) {
+                        ClienteCard(cliente: cliente)
+                            .onTapGesture { selected = cliente; showForm = true }
+                            .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {
                                 toDelete = cliente; showDeleteAlert = true
                             } label: { Label("Eliminar", systemImage: "trash") }
@@ -187,8 +174,6 @@ struct ClienteFormSwiftUIView: View {
     @State private var estado         = true
     @State private var error          = ""
     @State private var showDeleteAlert = false
-    @State private var isConsultandoDNI = false
-    @State private var consultaExitosa = false
 
     private var isEditing: Bool { cliente != nil }
     private var fullName:  String { "\(nombres) \(apellidos)".trimmingCharacters(in: .whitespaces) }
@@ -221,33 +206,15 @@ struct ClienteFormSwiftUIView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                            HStack(spacing: 8) {
-                                NPField(icon: "creditcard",
-                                        placeholder: "DNI (8 dígitos)",
-                                        text: $dni,
-                                        keyboardType: .numberPad,
-                                        accentColor: .npIndigo,
-                                        textColor: .white,
-                                        placeholderColor: Color.white.opacity(0.4),
-                                        bgColor: Color.white.opacity(0.06),
-                                        borderColor: Color.white.opacity(0.12))
-                                
-                                if isConsultandoDNI {
-                                    ProgressView()
-                                        .tint(.white)
-                                } else if consultaExitosa && dni.count == 8 {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(Color(hex: "#10B981"))
-                                        .font(.system(size: 20))
-                                }
-                            }
-                            .onChange(of: dni) { newValue in
-                                if newValue.count == 8 && !isEditing {
-                                    Task { await consultarDNI() }
-                                } else {
-                                    consultaExitosa = false
-                                }
-                            }
+                            NPField(icon: "creditcard",
+                                    placeholder: "DNI (8 dígitos)",
+                                    text: $dni,
+                                    keyboardType: .numberPad,
+                                    accentColor: .npIndigo,
+                                    textColor: .white,
+                                    placeholderColor: Color.white.opacity(0.4),
+                                    bgColor: Color.white.opacity(0.06),
+                                    borderColor: Color.white.opacity(0.12))
 
                             NPField(icon: "person.fill",
                                     placeholder: "Nombres",
@@ -416,72 +383,4 @@ struct ClienteFormSwiftUIView: View {
         .preferredColorScheme(.dark)
     }
 
-    private func consultarDNI() async {
-        guard dni.count == 8 else { return }
-        isConsultandoDNI = true
-        error = ""
-        do {
-            let data = try await ReniecService.shared.consultarDNI(dni)
-            withAnimation {
-                nombres = data.nombres.capitalized
-                apellidos = "\(data.apellidoPaterno.capitalized) \(data.apellidoMaterno.capitalized)".trimmingCharacters(in: .whitespaces)
-                consultaExitosa = true
-            }
-        } catch let serviceError {
-            error = serviceError.localizedDescription
-            consultaExitosa = false
-        }
-        isConsultandoDNI = false
-    }
-}
-
-// MARK: - Historial de Compras por Cliente
-struct ClienteHistoryView: View {
-    let cliente: Cliente
-    @StateObject private var vm = VentaViewModel()
-
-    private var ventasCliente: [Venta] {
-        vm.ventas.filter { $0.cliente?.idCliente == cliente.idCliente }
-    }
-
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 12) {
-                NPAvatar(name: "\(cliente.nombres ?? "") \(cliente.apellidos ?? "")", gradient: .clientes)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(cliente.nombres ?? "") \(cliente.apellidos ?? "")")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.npPrimary)
-                    Text("\(ventasCliente.count) compra\(ventasCliente.count != 1 ? "s" : "")")
-                        .font(.system(size: 13))
-                        .foregroundColor(.npSlate)
-                }
-                Spacer()
-            }
-            .padding(16)
-            .background(Color.npCard)
-
-            if ventasCliente.isEmpty {
-                NPEmptyState(icon: "cart", title: "Sin compras", subtitle: "Este cliente aún no ha realizado ninguna compra")
-            } else {
-                ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: 12) {
-                        ForEach(ventasCliente, id: \.idVenta) { venta in
-                            NavigationLink(destination: VentaDetailView(venta: venta)) {
-                                VentaCard(venta: venta)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, 24)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color.npBg.ignoresSafeArea())
-        .navigationTitle("Historial")
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear { vm.cargar() }
-    }
 }

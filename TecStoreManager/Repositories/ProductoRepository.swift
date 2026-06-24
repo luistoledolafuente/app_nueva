@@ -3,7 +3,6 @@ import CoreData
 class ProductoRepository {
     
     private let context: NSManagedObjectContext
-    private let sync = SyncService.shared
     
     init(context: NSManagedObjectContext = PersistenceController.shared.context) {
         self.context = context
@@ -22,10 +21,6 @@ class ProductoRepository {
         producto.estado        = true
         producto.imagenPath    = imagenPath
         PersistenceController.shared.save()
-        sync.pushProducto(producto)
-        if stock <= 5 {
-            NotificationManager.shared.scheduleLowStockAlert(productName: nombre, stock: stock, codigo: codigo)
-        }
     }
     
     // MARK: - Obtener todos
@@ -72,22 +67,10 @@ class ProductoRepository {
         producto.stock     = Int32(stock)
         if let img = imagenPath { producto.imagenPath = img }
         PersistenceController.shared.save()
-        sync.pushProducto(producto)
-        if stock <= 5 {
-            NotificationManager.shared.scheduleLowStockAlert(productName: producto.nombre ?? "", stock: stock, codigo: producto.codigo ?? "")
-        }
-    }
-    
-    // MARK: - Ajustar stock
-    func ajustarStock(_ producto: Producto, nuevaCantidad: Int, motivo: String) {
-        producto.stock = Int32(nuevaCantidad)
-        PersistenceController.shared.save()
-        sync.pushProducto(producto)
     }
     
     // MARK: - Eliminar
     func eliminar(_ producto: Producto) {
-        sync.deleteProducto(producto.idProducto?.uuidString ?? "")
         context.delete(producto)
         PersistenceController.shared.save()
     }
@@ -100,7 +83,7 @@ class ProductoRepository {
         return try? context.fetch(request).first
     }
     
-    // MARK: - Generar cÃ³digo de producto
+    // MARK: - Generar código de producto
     func generarCodigoProducto() -> String {
         let request: NSFetchRequest<Producto> = Producto.fetchRequest()
         request.predicate = NSPredicate(format: "codigo != nil")

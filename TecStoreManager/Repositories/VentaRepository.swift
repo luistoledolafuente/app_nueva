@@ -3,13 +3,12 @@ import CoreData
 class VentaRepository {
     
     private let context: NSManagedObjectContext
-    private let sync = SyncService.shared
     
     init(context: NSManagedObjectContext = PersistenceController.shared.context) {
         self.context = context
     }
     
-    // MARK: - Generar cÃ³digo de venta
+    // MARK: - Generar código de venta
     private func generarCodigoVenta() -> String {
         let request: NSFetchRequest<Venta> = Venta.fetchRequest()
         request.predicate = NSPredicate(format: "codigoVenta != nil")
@@ -21,13 +20,12 @@ class VentaRepository {
     }
 
     // MARK: - Crear (multi-producto)
-    func crear(cliente: Cliente, productos: [(producto: Producto, cantidad: Int)], metodoPago: String = "") {
+    func crear(cliente: Cliente, productos: [(producto: Producto, cantidad: Int)]) {
         let venta = Venta(context: context)
         venta.idVenta     = UUID()
         venta.codigoVenta = generarCodigoVenta()
         venta.fechaVenta  = Date()
         venta.cliente     = cliente
-        venta.metodoPago  = metodoPago
 
         var subtotalTotal: Double = 0
         for item in productos {
@@ -44,14 +42,6 @@ class VentaRepository {
             detalle.venta          = venta
 
             item.producto.stock -= Int32(item.cantidad)
-
-            if item.producto.stock <= 5 {
-                NotificationManager.shared.scheduleLowStockAlert(
-                    productName: item.producto.nombre ?? "",
-                    stock: Int(item.producto.stock),
-                    codigo: item.producto.codigo ?? ""
-                )
-            }
         }
 
         venta.subtotal = subtotalTotal
@@ -59,7 +49,6 @@ class VentaRepository {
         venta.total    = subtotalTotal + venta.igv
 
         PersistenceController.shared.save()
-        sync.pushVenta(venta)
     }
     
     // MARK: - Obtener todas
@@ -112,7 +101,6 @@ class VentaRepository {
                 }
             }
         }
-        sync.deleteVenta(venta.idVenta?.uuidString ?? "")
         context.delete(venta)
         PersistenceController.shared.save()
     }

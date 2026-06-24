@@ -23,18 +23,7 @@ struct ConfiguracionSwiftUIView: View {
         }
         .navigationTitle("Configuración")
         .navigationBarTitleDisplayMode(.large)
-        .onChange(of: stockAlerts) { newValue in
-            if newValue {
-                NotificationManager.shared.scheduleDailyStockCheck()
-            }
-        }
-        .onChange(of: reminders) { newValue in
-            if newValue {
-                NotificationManager.shared.scheduleDailyStockCheck()
-            } else {
-                NotificationManager.shared.cancelAll()
-            }
-        }
+
     }
 
     private var profileHeader: some View {

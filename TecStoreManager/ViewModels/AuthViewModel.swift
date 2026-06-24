@@ -1,6 +1,5 @@
 import Foundation
 import CoreData
-import CryptoKit
 import UIKit
 
 @MainActor
@@ -11,9 +10,9 @@ class AuthViewModel: ObservableObject {
     @Published var errorMessage: String = ""
     @Published var isLoading: Bool = false
 
-    private let authService: FirebaseAuthService
+    private let authService: LocalAuthService
 
-    init(authService: FirebaseAuthService = FirebaseAuthService()) {
+    init(authService: LocalAuthService = LocalAuthService()) {
         self.authService = authService
         verificarSesion()
     }
@@ -34,8 +33,6 @@ class AuthViewModel: ObservableObject {
         case .success(let usuario):
             usuarioActual = usuario
             estaLogueado = true
-            BiometricAuth.shared.saveCredentials(email: email, password: password)
-            await SyncService.shared.pullAll()
         case .failure(let error):
             errorMessage = error.localizedDescription
         }
@@ -58,31 +55,9 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    func signInWithGoogle(presenting viewController: UIViewController) async {
-        isLoading = true
-        errorMessage = ""
-
-        let result = await authService.signInWithGoogle(presenting: viewController)
-        switch result {
-        case .success(let usuario):
-            usuarioActual = usuario
-            estaLogueado = true
-            await SyncService.shared.pullAll()
-        case .failure(let error):
-            errorMessage = error.localizedDescription
-        }
-        isLoading = false
-    }
-
     func logout() {
         authService.logout()
         usuarioActual = nil
         estaLogueado = false
-        BiometricAuth.shared.clearCredentials()
-    }
-
-    static func hashPassword(_ password: String) -> String {
-        let digest = SHA256.hash(data: Data(password.utf8))
-        return digest.map { String(format: "%02x", $0) }.joined()
     }
 }
